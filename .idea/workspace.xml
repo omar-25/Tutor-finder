@@ -5,13 +5,37 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10b969e6-f8f5-426b-a6a8-5748d28d4efb" name="Changes" comment="finished UserManagment&amp;AuthComponent + registeration front end">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/IntelliLang.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/SetAvailability.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/SetAvailability.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/TutorDashboard.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/TutorDashboard.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/TutorDetails.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/TutorDetails.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/TutorList.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/TutorList.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/tutor/ITutorProfile.java" beforeDir="false" afterPath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/tutor/ITutorProfile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/tutor/TutorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/tutor/TutorController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/tutor/TutorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/tutor/TutorService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/YalaDars/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/YalaDars/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yaladars-frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/yaladars-frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yaladars-frontend/src/pages/Register.css" beforeDir="false" afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/Register.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yaladars-frontend/src/pages/Register.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/yaladars-frontend/src/pages/Register.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -39,8 +63,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;git@github.com:omar-25/tutor-finder.git&quot;,
-    &quot;accountId&quot;: &quot;abffced9-5a79-497c-94a9-ee38b5044cb7&quot;
+    &quot;url&quot;: &quot;https://github.com/omar-25/Tutor-finder.git&quot;,
+    &quot;accountId&quot;: &quot;c6db5a24-c780-4a41-b31e-cea2bebde627&quot;
   },
   &quot;recentNewPullRequestHead&quot;: {
     &quot;server&quot;: {
@@ -56,9 +80,9 @@
   <component name="HttpClientEndpointsTabState">
     <option name="cachedRequestData" value="&lt;CachedHttpClientTabRequests&gt;&#10;  &lt;entry key=&quot;a15012a6f85eaea7f9c92b6b343096285764a8e2&quot; value=&quot;###&amp;#10;DELETE http://localhost:8080/api/tutors/{{id}}&quot; /&gt;&#10;&lt;/CachedHttpClientTabRequests&gt;" />
   </component>
-  <component name="HttpClientOnboardingState"><![CDATA[{
-  "isOnboardingCommentShown": true
-}]]></component>
+  <component name="HttpClientOnboardingState">{
+  &quot;isOnboardingCommentShown&quot;: true
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -95,6 +119,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.YalaDarsApplication.executor": "Run",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
@@ -111,23 +136,6 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunDashboard">
-    <option name="configurationStatuses">
-      <map>
-        <entry key="HttpClient.HttpRequestRunConfigurationType">
-          <value>
-            <map>
-              <entry key="All in YalaDarsApp-endpoints" value="STOPPED" />
-              <entry key="All in YalaDarsApp-endpoints_3" value="STOPPED" />
-              <entry key="All in YalaDarsApp-endpoints_4" value="STOPPED" />
-              <entry key="YalaDarsApp-endpoints | #1" value="STOPPED" />
-              <entry key="YalaDarsApp-endpoints_1 | #1" value="STOPPED" />
-            </map>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
   <component name="RunManager" selected="Spring Boot.YalaDarsApplication">
     <configuration name="All in YalaDarsApp-endpoints" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/YalaDarsApp-endpoints.http">
       <method v="2" />
@@ -153,21 +161,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="HTTP Request.YalaDarsApp-endpoints | #1" />
-        <item itemvalue="HTTP Request.All in YalaDarsApp-endpoints_4" />
-        <item itemvalue="HTTP Request.All in YalaDarsApp-endpoints_3" />
-        <item itemvalue="HTTP Request.All in YalaDarsApp-endpoints" />
-        <item itemvalue="HTTP Request.YalaDarsApp-endpoints_1 | #1" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.24374.151" />
-        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.24374.151" />
+        <option value="bundled-jdk-30f59d01ecdd-cffe25b9f5b3-intellij.indexing.shared.core-IU-253.28294.334" />
       </set>
     </attachedChunks>
   </component>
@@ -184,6 +182,7 @@
       <workItem from="1779541408122" duration="1990000" />
       <workItem from="1779544099655" duration="2555000" />
       <workItem from="1779547243589" duration="3332000" />
+      <workItem from="1779554840715" duration="8151000" />
     </task>
     <task id="LOCAL-00001" summary="finished UserManagment&amp;AuthComponent + registeration front end">
       <option name="closed" value="true" />

@@ -3,7 +3,7 @@ package com.omar.yaladars.tutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
-
+import java.util.List;
 @Service
 public class TutorService implements ITutorProfile {
 
@@ -37,7 +37,10 @@ public class TutorService implements ITutorProfile {
         tutor.setSubjects(dto.getSubjects());
         return tutorRepository.save(tutor);
     }
-
+    @Override
+    public List<Tutor> getAllTutors() {
+        return tutorRepository.findAll();
+    }
     @Override
     public void deleteTutorProfile(UUID tutorId) {
         tutorRepository.deleteById(tutorId);

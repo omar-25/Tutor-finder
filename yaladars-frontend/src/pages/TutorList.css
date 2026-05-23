@@ -1,0 +1,479 @@
+/* TutorList.css - Modern Premium Design */
+
+:root {
+    --primary-green: #059669;
+    --primary-green-dark: #047857;
+    --primary-green-light: #10b981;
+    --primary-green-bg: #f0fdf4;
+    --dark-gray: #1f2937;
+    --medium-gray: #6b7280;
+    --light-gray: #f3f4f6;
+    --white: #ffffff;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.tutorlist-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Hero Section */
+.tutorlist-hero {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.tutorlist-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x bottom;
+    background-size: cover;
+    opacity: 0.1;
+}
+
+.tutorlist-hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.tutorlist-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+.tutorlist-hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.tutorlist-hero-highlight {
+    background: linear-gradient(135deg, #fff, #a7f3d0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.tutorlist-hero-subtitle {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tutorlist-hero-stats {
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 2rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    z-index: 2;
+}
+
+.tutorlist-stat {
+    text-align: center;
+}
+
+.tutorlist-stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--white);
+}
+
+.tutorlist-stat-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Back Button */
+.tutorlist-back-btn {
+    background: var(--white);
+    color: var(--primary-green);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.tutorlist-back-btn:hover {
+    transform: translateX(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Filters Section */
+.tutorlist-filters {
+    max-width: 1200px;
+    margin: -1.5rem auto 0;
+    padding: 0 2rem;
+    display: flex;
+    gap: 1rem;
+    position: relative;
+    z-index: 10;
+}
+
+.tutorlist-search-box {
+    flex: 2;
+    position: relative;
+}
+
+.tutorlist-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.125rem;
+}
+
+.tutorlist-search-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 2.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background: var(--white);
+    font-family: inherit;
+}
+
+.tutorlist-search-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.tutorlist-clear-btn {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--medium-gray);
+    padding: 0.25rem;
+}
+
+.tutorlist-subject-filter {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    background: var(--white);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tutorlist-subject-filter:focus {
+    outline: none;
+    border-color: var(--primary-green);
+}
+
+/* Results Count */
+.tutorlist-results-count {
+    max-width: 1200px;
+    margin: 1.5rem auto 0;
+    padding: 0 2rem;
+    font-size: 0.875rem;
+    color: var(--medium-gray);
+    font-weight: 500;
+}
+
+/* Loading State */
+.tutorlist-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.tutorlist-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--light-gray);
+    border-top-color: var(--primary-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.tutorlist-loading-text {
+    margin-top: 1rem;
+    color: var(--medium-gray);
+}
+
+/* Empty State */
+.tutorlist-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.tutorlist-empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.tutorlist-empty-title {
+    font-size: 1.5rem;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+}
+
+.tutorlist-empty-text {
+    color: var(--medium-gray);
+    margin-bottom: 1.5rem;
+}
+
+.tutorlist-reset-btn {
+    background: var(--primary-green);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tutorlist-reset-btn:hover {
+    background: var(--primary-green-dark);
+    transform: translateY(-2px);
+}
+
+/* Tutors Grid */
+.tutorlist-grid {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+/* Tutor Card */
+.tutorlist-card {
+    background: var(--white);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+}
+
+.tutorlist-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-2xl);
+}
+
+.tutorlist-card-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 2;
+}
+
+.tutorlist-card-rate {
+    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+    color: var(--white);
+    padding: 0.375rem 0.875rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+}
+
+.tutorlist-card-avatar {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.tutorlist-avatar-icon {
+    font-size: 4rem;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.tutorlist-card-content {
+    padding: 1.5rem;
+}
+
+.tutorlist-card-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+}
+
+.tutorlist-card-bio {
+    font-size: 0.875rem;
+    color: var(--medium-gray);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.tutorlist-card-subjects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tutorlist-subject-tag {
+    background: var(--primary-green-bg);
+    color: var(--primary-green-dark);
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.tutorlist-subject-tag:hover {
+    background: var(--primary-green-light);
+    color: var(--white);
+}
+
+.tutorlist-card-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tutorlist-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--medium-gray);
+}
+
+.tutorlist-view-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+    color: var(--white);
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tutorlist-view-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tutorlist-hero {
+        padding: 2rem 1rem;
+    }
+
+    .tutorlist-hero-title {
+        font-size: 2rem;
+    }
+
+    .tutorlist-hero-stats {
+        position: static;
+        transform: none;
+        margin-top: 1.5rem;
+        justify-content: center;
+    }
+
+    .tutorlist-filters {
+        flex-direction: column;
+        margin-top: -2rem;
+        padding: 0 1rem;
+    }
+
+    .tutorlist-grid {
+        padding: 0 1rem;
+        gap: 1rem;
+    }
+
+    .tutorlist-results-count {
+        padding: 0 1rem;
+    }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-green-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-green);
+}

@@ -1,5 +1,5 @@
 package com.omar.yaladars.tutor;
-
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +41,11 @@ public class TutorController {
     @GetMapping("/{id}/rating")
     public ResponseEntity<Double> rating(@PathVariable UUID id) {
         return ResponseEntity.ok(tutorService.getTutorRating(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Tutor>> getAll() {
+        return ResponseEntity.ok(tutorService.getAllTutors());
     }
 
 }
