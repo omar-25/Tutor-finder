@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="10b969e6-f8f5-426b-a6a8-5748d28d4efb" name="Changes" comment="finished UserManagment&amp;AuthComponent + registeration front end">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/YalaDars/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/YalaDars/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/tutor/Tutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/YalaDars/src/main/java/com/omar/yaladars/tutor/Tutor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/yaladars-frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/yaladars-frontend/src/App.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,9 +57,9 @@
   <component name="HttpClientEndpointsTabState">
     <option name="cachedRequestData" value="&lt;CachedHttpClientTabRequests&gt;&#10;  &lt;entry key=&quot;a15012a6f85eaea7f9c92b6b343096285764a8e2&quot; value=&quot;###&amp;#10;DELETE http://localhost:8080/api/tutors/{{id}}&quot; /&gt;&#10;&lt;/CachedHttpClientTabRequests&gt;" />
   </component>
-  <component name="HttpClientOnboardingState"><![CDATA[{
-  "isOnboardingCommentShown": true
-}]]></component>
+  <component name="HttpClientOnboardingState">{
+  &quot;isOnboardingCommentShown&quot;: true
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -99,9 +100,10 @@
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/omar/Desktop/omar/YalaDarsApp",
+    "last_opened_file_path": "D:/Hell/Part-2/CS344/project/Tutor-finder",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
