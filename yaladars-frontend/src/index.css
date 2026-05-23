@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap');
+
+:root {
+  /* Brand Accent Greens */
+  --primary: #059669;        /* Deep Mint/Emerald for primary text, links, buttons, and active states */
+  --primary-dark: #047857;   /* Darker Forest Green for text hovers and button hover states */
+  --primary-light: #ECFDF5;  /* Soft Mint Tint for input hover fills, badges, and selected cards */
+  --accent: #10B981;         /* Vibrant Emerald Green for star ratings and UI highlights */
+
+  /* Booking Status Colors */
+  --status-pending: #D97706;   /* Warm Amber */
+  --status-accepted: #059669;  /* Aligns with your deep primary green */
+  --status-rejected: #EF4444;  /* Rose Red */
+  --status-cancelled: #6B7280; /* Slate Gray */
+
+  /* The White & Bright Foundation */
+  --bg-app: #FFFFFF;           /* Pure White page canvas background */
+  --bg-card: #F8FAFC;          /* Soft Off-White/Slate-tint for the form card to give it subtle definition */
+  --text-main: #059669;        /* 🟢 Core typography is now your primary brand Green */
+  --text-muted: #475569;       /* Slate-600 gray for minor helper text, labels, and input placeholds */
+  --border: #CBD5E1;           /* Clean gray borders for input fields */
+
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  margin: 0;
+}
+
+/* Dark Mode Configuration Switch (Inverted for Dark Preferences) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-app: #060B09;         /* Dark Forest Canvas */
+    --bg-card: #0F1A16;        /* Deep Emerald-tinted Charcoal Card */
+    --text-main: #10B981;      /* Bright Emerald for readability against dark backgrounds */
+    --text-muted: #94A3B8;     /* Light slate-gray for label text comfort */
+    --border: #1C332B;         /* Muted dark green-gray borders */
+    --primary-light: #064E3B;  /* Deep forest green fill */
+  }
+}
