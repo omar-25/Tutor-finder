@@ -1,0 +1,137 @@
+GET http://localhost:8080/api/tutors/cb69de78-89ec-45c2-bf77-29db5a86b4b9
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0dXRvckBtYWlsIiwicm9sZSI6IlRVVE9SIiwiaWF0IjoxNzc5NTUwNTE5LCJleHAiOjE3Nzk2MzY5MTl9.KbVxZbmWKtwQiCf6aen7w_d0yGdlMp5UCbXMOO9dF1w
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-05-23T183600.200.json
+
+###
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+Content-Length: 48
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "tutor@mail",
+  "password": "123"
+}
+
+<> 2026-05-23T183519.200.json
+
+###
+
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+Content-Length: 133
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "tutor@mail",
+  "password": "123",
+  "firstName": "tut",
+  "lastName": "or",
+  "phoneNumber": "123",
+  "role": "TUTOR"
+}
+
+<> 2026-05-23T183454.200.json
+
+###
+
+GET http://localhost:8080/api/tutors/cb69de78-89ec-45c2-bf77-29db5a86b4b9
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+content-length: 176
+
+Autherization:"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0QG1haWwiLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc3OTU1MDM3MCwiZXhwIjoxNzc5NjM2NzcwfQ.ARAIl1mitmOaK-yZMk8r_U758iJ7jjLDRmvado3joHE",
+
+<> 2026-05-23T183346.403.json
+
+###
+
+GET http://localhost:8080/api/tutors/cb69de78-89ec-45c2-bf77-29db5a86b4b9
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-05-23T183307.403.json
+
+###
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+Content-Length: 47
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "test@mail",
+  "password": "123"
+}
+
+<> 2026-05-23T183250.200.json
+
+###
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+Content-Length: 51
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "test@mail.com",
+  "password": "123"
+}
+
+<> 2026-05-23T183237.400.json
+
+###
+
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+Content-Length: 138
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "test@mail",
+  "password": "123",
+  "firstName": "karim",
+  "lastName": "emr",
+  "phoneNumber": "1234",
+  "role": "STUDENT"
+}
+
+<> 2026-05-23T183201.200.json
+
+###
+
+GET http://localhost:8080/api/tutors/cb69de78-89ec-45c2-bf77-29db5a86b4b9
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-05-23T183017.403.json
+
+###
+
+GET http://localhost:8080/api/tutors/cb69de78-89ec-45c2-bf77-29db5a86b4b9
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2026.1.2
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-05-23T182855.403.json
+
+###
+
