@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="10b969e6-f8f5-426b-a6a8-5748d28d4efb" name="Changes" comment="finished UserManagment&amp;AuthComponent + registeration front end" />
+    <list default="true" id="10b969e6-f8f5-426b-a6a8-5748d28d4efb" name="Changes" comment="finished UserManagment&amp;AuthComponent + registeration front end">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YalaDars/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/YalaDars/src/main/resources/application.properties" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,10 +17,25 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
+  &quot;history&quot;: [
+    {
+      &quot;state&quot;: &quot;OPEN&quot;
+    }
+  ],
   &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;omar-25&quot;
+    &quot;state&quot;: &quot;OPEN&quot;
   }
+}</component>
+  <component name="GitHubPullRequestState">{
+  &quot;prStates&quot;: [
+    {
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDOSYtq787epLQP&quot;,
+        &quot;number&quot;: 4
+      },
+      &quot;lastSeen&quot;: 1779549035768
+    }
+  ]
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
@@ -35,6 +53,12 @@
     &quot;repository&quot;: &quot;tutor-finder&quot;
   }
 }</component>
+  <component name="HttpClientEndpointsTabState">
+    <option name="cachedRequestData" value="&lt;CachedHttpClientTabRequests&gt;&#10;  &lt;entry key=&quot;a15012a6f85eaea7f9c92b6b343096285764a8e2&quot; value=&quot;###&amp;#10;DELETE http://localhost:8080/api/tutors/{{id}}&quot; /&gt;&#10;&lt;/CachedHttpClientTabRequests&gt;" />
+  </component>
+  <component name="HttpClientOnboardingState"><![CDATA[{
+  "isOnboardingCommentShown": true
+}]]></component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -56,7 +80,17 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "HTTP Request.All in YalaDarsApp-endpoints.executor": "Run",
+    "HTTP Request.All in YalaDarsApp-endpoints_2.executor": "Run",
+    "HTTP Request.All in YalaDarsApp-endpoints_3.executor": "Run",
+    "HTTP Request.All in YalaDarsApp-endpoints_4.executor": "Run",
+    "HTTP Request.YalaDarsApp-endpoints | #1.executor": "Run",
+    "HTTP Request.YalaDarsApp-endpoints_1 | #1.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -77,7 +111,39 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunDashboard">
+    <option name="configurationStatuses">
+      <map>
+        <entry key="HttpClient.HttpRequestRunConfigurationType">
+          <value>
+            <map>
+              <entry key="All in YalaDarsApp-endpoints" value="STOPPED" />
+              <entry key="All in YalaDarsApp-endpoints_3" value="STOPPED" />
+              <entry key="All in YalaDarsApp-endpoints_4" value="STOPPED" />
+              <entry key="YalaDarsApp-endpoints | #1" value="STOPPED" />
+              <entry key="YalaDarsApp-endpoints_1 | #1" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.YalaDarsApplication">
+    <configuration name="All in YalaDarsApp-endpoints" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/YalaDarsApp-endpoints.http">
+      <method v="2" />
+    </configuration>
+    <configuration name="All in YalaDarsApp-endpoints_3" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/YalaDarsApp-endpoints_3.http">
+      <method v="2" />
+    </configuration>
+    <configuration name="All in YalaDarsApp-endpoints_4" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/YalaDarsApp-endpoints_4.http">
+      <method v="2" />
+    </configuration>
+    <configuration name="YalaDarsApp-endpoints | #1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$APPLICATION_CONFIG_DIR$/scratches/YalaDarsApp-endpoints.http" executionIdentifier="#1" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="YalaDarsApp-endpoints_1 | #1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$APPLICATION_CONFIG_DIR$/scratches/YalaDarsApp-endpoints_1.http" executionIdentifier="#1" runType="Run single request">
+      <method v="2" />
+    </configuration>
     <configuration name="YalaDarsApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <option name="ALTERNATIVE_JRE_PATH" value="25" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -87,6 +153,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="HTTP Request.YalaDarsApp-endpoints | #1" />
+        <item itemvalue="HTTP Request.All in YalaDarsApp-endpoints_4" />
+        <item itemvalue="HTTP Request.All in YalaDarsApp-endpoints_3" />
+        <item itemvalue="HTTP Request.All in YalaDarsApp-endpoints" />
+        <item itemvalue="HTTP Request.YalaDarsApp-endpoints_1 | #1" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -95,6 +170,9 @@
         <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.24374.151" />
       </set>
     </attachedChunks>
+  </component>
+  <component name="StructureViewState">
+    <option name="selectedTab" value="Logical" />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -105,7 +183,7 @@
       <updated>1779541399093</updated>
       <workItem from="1779541408122" duration="1990000" />
       <workItem from="1779544099655" duration="2555000" />
-      <workItem from="1779547243589" duration="994000" />
+      <workItem from="1779547243589" duration="3332000" />
     </task>
     <task id="LOCAL-00001" summary="finished UserManagment&amp;AuthComponent + registeration front end">
       <option name="closed" value="true" />
@@ -115,7 +193,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779544993449</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="finished UserManagment&amp;AuthComponent + registeration front end">
+      <option name="closed" value="true" />
+      <created>1779548339914</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1779548339914</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
