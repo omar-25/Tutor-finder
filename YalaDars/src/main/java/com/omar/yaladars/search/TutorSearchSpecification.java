@@ -9,16 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TutorSearchSpecification — builds JPA Criteria predicates from a SearchCriteria object.
+ * TutorSearchSpecification — builds JPA Criteria predicates from SearchCriteria.
  *
- * Filters applied:
- *   - keyword  → ILIKE on subjects list (via JOIN) or bio
- *   - subject  → exact match on subjects list
- *   - minPrice / maxPrice → range on hourlyRate
- *   - availability → match dayOfTheWeek in the tutor's Availability records
- *
- * The minRating filter is applied in the service layer after the DB query
- * because average rating is a computed/aggregated value.
+ * Fix applied: the subjects ElementCollection is joined at most ONCE per query.
+ * Previously, if both keyword and subject filters were active at the same time,
+ * two separate LEFT JOINs on the same "subjects" collection were added, which
+ * produced a Cartesian product and returned duplicate/wrong results.
+ * Now a single join is created and reused for both predicates.
  */
 public class TutorSearchSpecification implements Specification<Tutor> {
 
@@ -35,43 +32,40 @@ public class TutorSearchSpecification implements Specification<Tutor> {
 
         List<Predicate> predicates = new ArrayList<>();
 
-        // ── Keyword: match bio OR any subject in the subjects list ──────────
+        // Create the subjects join ONCE if either keyword or subject filter is active.
+        // Re-using the same Join avoids a Cartesian product when both are set.
+        boolean needsSubjectJoin = hasValue(criteria.getKeyword()) || hasValue(criteria.getSubject());
+        Join<Tutor, String> subjectJoin = null;
+        if (needsSubjectJoin) {
+            subjectJoin = root.join("subjects", JoinType.LEFT);
+            query.distinct(true);
+        }
+
+        // ── Keyword: match bio OR any subject in the subjects collection ──────
         if (hasValue(criteria.getKeyword())) {
             String pattern = "%" + criteria.getKeyword().toLowerCase() + "%";
-
-            // Join on subjects (ElementCollection → "tutor_subjects" table)
-            Join<Tutor, String> subjectJoin = root.join("subjects", JoinType.LEFT);
-            query.distinct(true); // avoid duplicate rows from the JOIN
-
-            Predicate bioMatch      = cb.like(cb.lower(root.get("bio")), pattern);
-            Predicate subjectMatch  = cb.like(cb.lower(subjectJoin), pattern);
-
+            Predicate bioMatch     = cb.like(cb.lower(root.get("bio")), pattern);
+            Predicate subjectMatch = cb.like(cb.lower(subjectJoin), pattern);
             predicates.add(cb.or(bioMatch, subjectMatch));
         }
 
-        // ── Subject: exact case-insensitive match ────────────────────────────
+        // ── Subject: exact case-insensitive match on the same join ────────────
         if (hasValue(criteria.getSubject())) {
-            Join<Tutor, String> subjectJoin = root.join("subjects", JoinType.LEFT);
-            query.distinct(true);
             predicates.add(
-                cb.equal(cb.lower(subjectJoin),
-                         criteria.getSubject().toLowerCase())
+                cb.equal(cb.lower(subjectJoin), criteria.getSubject().toLowerCase())
             );
         }
 
-        // ── Price range ──────────────────────────────────────────────────────
+        // ── Price range ───────────────────────────────────────────────────────
         if (criteria.getMinPrice() != null) {
-            predicates.add(cb.greaterThanOrEqualTo(root.get("hourlyRate"),
-                                                   criteria.getMinPrice()));
+            predicates.add(cb.greaterThanOrEqualTo(root.get("hourlyRate"), criteria.getMinPrice()));
         }
         if (criteria.getMaxPrice() != null) {
-            predicates.add(cb.lessThanOrEqualTo(root.get("hourlyRate"),
-                                                criteria.getMaxPrice()));
+            predicates.add(cb.lessThanOrEqualTo(root.get("hourlyRate"), criteria.getMaxPrice()));
         }
 
-        // ── Availability day filter ──────────────────────────────────────────
+        // ── Availability day filter ───────────────────────────────────────────
         if (hasValue(criteria.getAvailability())) {
-            // Map frontend labels → DB values stored in Availability.dayOfTheWeek
             String dayFilter = mapAvailabilityLabel(criteria.getAvailability());
             if (dayFilter != null) {
                 Join<Tutor, Availability> avJoin = root.join("availabilities", JoinType.LEFT);
@@ -86,22 +80,20 @@ public class TutorSearchSpecification implements Specification<Tutor> {
         return cb.and(predicates.toArray(new Predicate[0]));
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
-
     private boolean hasValue(String s) {
         return s != null && !s.isBlank();
     }
 
     /**
-     * Maps frontend availability labels to the day strings stored in the DB.
-     * Extend this as your Availability data model evolves.
+     * Maps frontend availability labels to substrings stored in Availability.dayOfTheWeek.
+     * Uses partial match (LIKE %value%) so "Saturday" and "Sunday" both match "weekend" etc.
      */
     private String mapAvailabilityLabel(String label) {
         return switch (label.toLowerCase()) {
-            case "weekends"  -> "saturday";   // partial match covers Saturday & Sunday
+            case "weekends"  -> "saturday";
             case "evenings"  -> "evening";
             case "mornings"  -> "morning";
-            case "weekdays"  -> "monday";     // partial match catches Mon–Fri if stored consistently
+            case "weekdays"  -> "monday";
             default          -> null;
         };
     }

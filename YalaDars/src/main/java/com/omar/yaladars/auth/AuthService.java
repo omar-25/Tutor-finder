@@ -1,9 +1,15 @@
 package com.omar.yaladars.auth;
 
+import com.omar.yaladars.UserManagement.Role;
 import com.omar.yaladars.UserManagement.User;
 import com.omar.yaladars.UserManagement.UserRepository;
+import com.omar.yaladars.tutor.Tutor;
+import com.omar.yaladars.tutor.TutorProfileRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 @Service
 public class AuthService implements IAuth {
@@ -11,16 +17,25 @@ public class AuthService implements IAuth {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TutorProfileRepository tutorRepository;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
-        this.userRepository = userRepository;
+                       JwtService jwtService,
+                       TutorProfileRepository tutorRepository) {
+        this.userRepository  = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
+        this.jwtService      = jwtService;
+        this.tutorRepository = tutorRepository;
     }
 
+    /**
+     * Registers a new user. If the role is TUTOR, also creates a blank
+     * Tutor profile row linked to this User — so SearchService.toSearchResult()
+     * can resolve tutor.getUser().getFirstName() without a NullPointerException.
+     */
     @Override
+    @Transactional
     public AuthResponse register(Register request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already in use");
@@ -35,6 +50,16 @@ public class AuthService implements IAuth {
         user.setRole(request.getRole());
 
         userRepository.save(user);
+
+        // Create a linked Tutor profile when registering as a TUTOR
+        if (request.getRole() == Role.TUTOR) {
+            Tutor tutor = new Tutor();
+            tutor.setUser(user);
+            tutor.setSubjects(new ArrayList<>());
+            tutor.setHourlyRate(0.0);
+            tutor.setBio("");
+            tutorRepository.save(tutor);
+        }
 
         String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
         return new AuthResponse(token, user.getEmail(), user.getRole().name());
