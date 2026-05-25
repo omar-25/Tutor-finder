@@ -7,6 +7,9 @@ import TutorDetails from './pages/TutorDetails';
 import Login from './pages/Login';
 import StudentDashboard from "./pages/StudentDashboard.jsx"; // Now being used below
 import Booking from "./pages/Booking.jsx"
+import TutorSearch from './pages/TutorSearch';
+
+
 
 function App() {
     return (
