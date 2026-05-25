@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 import java.util.List;
+
 @Service
 public class TutorService implements ITutorProfile {
 
@@ -22,22 +23,20 @@ public class TutorService implements ITutorProfile {
 
     /**
      * Creates a Tutor profile and links it to the User account identified
-     * by userId. This wires the Tutor.user foreign key so SearchService
-     * can return the tutor's name from the User table.
+     * by userId using its unique identifier.
      */
     @Override
     public Tutor createTutorProfile(UUID userId, TutorProfileDTO dto) {
+        // Optional verification step: verify the user actually exists before creating a tutor profile
+        if (userId != null && !userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found: " + userId);
+        }
+
         Tutor tutor = new Tutor();
         tutor.setHourlyRate(dto.getHourlyRate());
         tutor.setBio(dto.getBio());
         tutor.setSubjects(dto.getSubjects());
-        tutor.setUserId(userId);
-
-        if (userId != null) {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-            tutor.setUser(user);
-        }
+        tutor.setUserId(userId); // Explicitly maps the raw UUID foreign key relation
 
         return tutorRepository.save(tutor);
     }
@@ -56,10 +55,12 @@ public class TutorService implements ITutorProfile {
         tutor.setSubjects(dto.getSubjects());
         return tutorRepository.save(tutor);
     }
+
     @Override
     public List<Tutor> getAllTutors() {
         return tutorRepository.findAll();
     }
+
     @Override
     public void deleteTutorProfile(UUID tutorId) {
         tutorRepository.deleteById(tutorId);

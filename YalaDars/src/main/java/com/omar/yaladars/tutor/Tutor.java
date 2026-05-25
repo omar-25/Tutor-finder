@@ -22,21 +22,10 @@ public class Tutor {
 
     @ElementCollection
     private List<String> subjects;
-
-    /**
-     * Back-reference to Availability records.
-     * Required by TutorSearchSpecification to JOIN on availability day filters.
-     */
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Availability> availabilities = new ArrayList<>();
 
-    /**
-     * Link to the User account that owns this tutor profile.
-     * Required so SearchService can return the tutor's name.
-     */
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+
 
     public Tutor() {}
 
@@ -84,4 +73,13 @@ public class Tutor {
     public void setSubjects(List<String> subjects) {
         this.subjects = subjects;
     }
+    // Add this inside your Tutor class, near the other getters
+    public List<Availability> getAvailabilities() {
+        return availabilities;
+    }
+
+    public void setAvailabilities(List<Availability> availabilities) {
+        this.availabilities = availabilities;
+    }
+
 }

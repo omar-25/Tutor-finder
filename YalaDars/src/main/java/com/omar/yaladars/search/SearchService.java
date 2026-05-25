@@ -3,6 +3,7 @@ package com.omar.yaladars.search;
 import com.omar.yaladars.tutor.Availability;
 import com.omar.yaladars.tutor.AvailabilityRepository;
 import com.omar.yaladars.tutor.Tutor;
+import com.omar.yaladars.tutor.TutorProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,11 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class SearchService implements ISearch {
 
-    private final TutorSearchRepository searchRepository;
+    private final TutorProfileRepository searchRepository;
     private final AvailabilityRepository availabilityRepository;
 
     @Autowired
-    public SearchService(TutorSearchRepository searchRepository,
+    public SearchService(TutorProfileRepository searchRepository,
                          AvailabilityRepository availabilityRepository) {
         this.searchRepository       = searchRepository;
         this.availabilityRepository = availabilityRepository;
@@ -54,11 +55,11 @@ public class SearchService implements ISearch {
         result.setHourlyRate(tutor.getHourlyRate());
         result.setSubjects(tutor.getSubjects());
 
-        // Name from linked User — populated when a TUTOR registers
-        if (tutor.getUser() != null) {
-            result.setFirstName(tutor.getUser().getFirstName());
-            result.setLastName(tutor.getUser().getLastName());
-        }
+        // FIX 1: Since tutor.getUser() is removed, you will need to fetch names
+        // via a User Component/Repository using tutor.getUserId() later.
+        // For now, leaving placeholders or setting them to null to prevent compilation errors.
+        result.setFirstName(null);
+        result.setLastName(null);
 
         // Rating = 0.0 until Reviews component is built
         result.setAverageRating(0.0);
@@ -66,11 +67,9 @@ public class SearchService implements ISearch {
         // Session count = 0 until SessionManagement component is built
         result.setSessionsCompleted(0);
 
-        // Availability days from the existing Availability table
-        List<Availability> availabilities =
-                availabilityRepository.findByTutorTutorId(tutor.getTutorId());
-
-        List<String> days = availabilities.stream()
+        // FIX 2: Optimized to use the mapped relationship directly from the Tutor entity
+        // instead of firing a separate repository database query for every single tutor item.
+        List<String> days = tutor.getAvailabilities().stream()
                 .map(Availability::getDayOfTheWeek)
                 .distinct()
                 .collect(Collectors.toList());

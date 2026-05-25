@@ -28,12 +28,6 @@ public class AuthService implements IAuth {
         this.jwtService      = jwtService;
         this.tutorRepository = tutorRepository;
     }
-
-    /**
-     * Registers a new user. If the role is TUTOR, also creates a blank
-     * Tutor profile row linked to this User — so SearchService.toSearchResult()
-     * can resolve tutor.getUser().getFirstName() without a NullPointerException.
-     */
     @Override
     @Transactional
     public AuthResponse register(Register request) {
@@ -54,7 +48,6 @@ public class AuthService implements IAuth {
         // Create a linked Tutor profile when registering as a TUTOR
         if (request.getRole() == Role.TUTOR) {
             Tutor tutor = new Tutor();
-            tutor.setUser(user);
             tutor.setSubjects(new ArrayList<>());
             tutor.setHourlyRate(0.0);
             tutor.setBio("");

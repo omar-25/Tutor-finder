@@ -2,6 +2,8 @@ package com.omar.yaladars.tutor;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -17,6 +19,8 @@ import java.util.UUID;
 public interface TutorProfileRepository
         extends JpaRepository<Tutor, UUID>, JpaSpecificationExecutor<Tutor> {
 
-    Optional<Tutor> findByUserEmail(String email);
     Optional<Tutor> findByUserId(UUID userId);
+    // Overriding the default parser with a custom join query
+    @Query("SELECT t FROM Tutor t, User u WHERE t.userId = u.id AND u.email = :email")
+    Optional<Tutor> findByUserEmail(@Param("email") String email);
 }
