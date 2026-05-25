@@ -115,7 +115,7 @@ const Register = () => {
                 role: formData.role
             };
 
-            const response = await fetch('/api/auth/register', {
+            const response = await fetch('http://localhost:8080/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(registrationData),
@@ -124,26 +124,43 @@ const Register = () => {
             const data = await response.json();
 
             if (!response.ok) {
-                if (data.fields) setErrors(prev => ({ ...prev, ...data.fields }));
-                throw new Error(data.message || 'Registration failed. Please try again.');
+                throw new Error(data.error || 'Registration failed. Please try again.');
             }
 
-            localStorage.setItem('userEmail', formData.email);
-            localStorage.setItem('userRole', formData.role);
-            if (data.token) localStorage.setItem('token', data.token);
+            // Clear old localStorage data first
+            localStorage.clear();
+
+            // Store auth data
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userEmail', data.email);
+            localStorage.setItem('userRole', data.role);
+
+            // Fetch user profile to get ID
+            const userResponse = await fetch(`http://localhost:8080/api/users/email/${data.email}`, {
+                headers: { 'Authorization': `Bearer ${data.token}` }
+            });
+
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                localStorage.setItem('userId', userData.id);
+                localStorage.setItem('userFirstName', userData.firstName);
+                localStorage.setItem('userLastName', userData.lastName);
+                localStorage.setItem('userPhone', userData.phoneNumber);
+                localStorage.setItem('userName', userData.firstName + ' ' + userData.lastName);
+            }
 
             if (formData.role === 'STUDENT') {
                 navigate('/student/dashboard');
             } else {
                 navigate('/tutor/dashboard');
             }
+
         } catch (error) {
             setErrors(prev => ({ ...prev, submit: error.message || 'Cannot connect to server.' }));
         } finally {
             setIsLoading(false);
         }
     };
-
     const strength = getPasswordStrengthText();
 
     return (

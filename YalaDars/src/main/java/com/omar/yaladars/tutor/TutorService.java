@@ -20,6 +20,7 @@ public class TutorService implements ITutorProfile {
         tutor.setHourlyRate(dto.getHourlyRate());
         tutor.setBio(dto.getBio());
         tutor.setSubjects(dto.getSubjects());
+        tutor.setUserId(userId);
         return tutorRepository.save(tutor);
     }
 

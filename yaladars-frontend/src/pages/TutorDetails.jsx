@@ -40,10 +40,31 @@ const TutorDetail = () => {
         setSelectedSlot(null);
     };
 
+    // In TutorDetail.jsx, replace the confirmBooking and modal with this:
+
+
+// Replace the confirmBooking function with:
     const confirmBooking = () => {
-        alert(`Booking request sent for ${selectedSlot.dayOfTheWeek} at ${selectedSlot.startTime}!`);
+        // Close modal and navigate to booking page with tutor and slot info
         closeModal();
+        navigate('/booking', {
+            state: {
+                tutor: {
+                    id: tutor.tutorId,
+                    name: tutor.name
+                },
+                preferredSlot: selectedSlot ? {
+                    day: selectedSlot.dayOfTheWeek,
+                    startTime: selectedSlot.startTime,
+                    endTime: selectedSlot.endTime,
+                    subject: selectedSlot.subject
+                } : null
+            }
+        });
     };
+
+
+
 
     if (loading) {
         return (
@@ -237,10 +258,9 @@ const TutorDetail = () => {
                                 <span className="detail-modal-value highlight">${tutor.hourlyRate}/hour</span>
                             </div>
                         </div>
-                        <div className="detail-modal-actions">
-                            <button className="detail-modal-cancel" onClick={closeModal}>Cancel</button>
-                            <button className="detail-modal-confirm" onClick={confirmBooking}>Confirm Booking</button>
-                        </div>
+                        <button className="detail-modal-confirm" onClick={confirmBooking}>
+                            Continue to Booking →
+                        </button>
                     </div>
                 </div>
             )}

@@ -48,7 +48,7 @@ const TutorList = () => {
                     <p className="tutorlist-hero-subtitle">
                         Connect with experienced tutors who are passionate about teaching
                     </p>
-                    <button className="tutorlist-back-btn" onClick={() => navigate('/tutor/dashboard')}>
+                    <button className="tutorlist-back-btn" onClick={() => navigate('/student/dashboard')}>
                         ← Back to Dashboard
                     </button>
                 </div>

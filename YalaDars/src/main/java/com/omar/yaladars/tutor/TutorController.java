@@ -18,7 +18,7 @@ public class TutorController {
 
     @PostMapping
     public ResponseEntity<Tutor> create(@RequestBody TutorProfileDTO dto) {
-        return ResponseEntity.ok(tutorService.createTutorProfile(null, dto));
+        return ResponseEntity.ok(tutorService.createTutorProfile(dto.getUserId(), dto));
     }
 
     @GetMapping("/{id}")

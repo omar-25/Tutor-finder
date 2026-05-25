@@ -7,6 +7,9 @@ import java.util.UUID;
 @Entity
 public class Tutor {
 
+    @Column(name = "user_id")
+    private UUID userId;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID tutorId;
@@ -20,11 +23,8 @@ public class Tutor {
 
     public Tutor() {}
 
-    public Tutor(UUID tutorId,
-                 Double hourlyRate,
-                 String bio,
-                 List<String> subjects) {
-
+    public Tutor(UUID tutorId, Double hourlyRate, String bio, List<String> subjects, UUID userId) {
+        this.userId = userId;
         this.tutorId = tutorId;
         this.hourlyRate = hourlyRate;
         this.bio = bio;
@@ -33,6 +33,11 @@ public class Tutor {
 
     public UUID getTutorId() {
         return tutorId;
+    }
+    public void setUserId(UUID userId) { this.userId = userId; }
+
+    public UUID getUserId(){
+        return userId;
     }
 
     public void setTutorId(UUID tutorId) {

@@ -12,17 +12,127 @@ const TutorDashboard = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [pendingBookings, setPendingBookings] = useState([]);
+    const [allBookings, setAllBookings] = useState([]);
+    const [showAllBookings, setShowAllBookings] = useState(false);
 
     const email = localStorage.getItem('userEmail');
     const name = localStorage.getItem('userName');
 
-    // Load tutor profile and availability
     useEffect(() => {
         if (tutorId) {
             loadTutorProfile();
             loadAvailability();
+            loadBookings();
         }
     }, [tutorId]);
+
+    const loadBookings = async () => {
+        try {
+            // Get all tutor bookings
+            const response = await fetch(
+                `http://localhost:8080/api/bookings/tutor/${tutorId}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                setAllBookings(data);
+
+                // Filter pending bookings
+                const pending = data.filter(
+                    booking => booking.status === 'PENDING'
+                );
+                setPendingBookings(pending);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleAcceptBooking = async (bookingId) => {
+        try {
+            const response = await fetch(
+                `http://localhost:8080/api/bookings/${bookingId}/accept`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            setSuccess('✅ Booking accepted successfully');
+            await loadBookings(); // Refresh the list
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            setError('Failed to accept booking');
+            setTimeout(() => setError(''), 3000);
+        }
+    };
+
+    const handleRejectBooking = async (bookingId) => {
+        const reason = prompt('Please provide a reason for rejection:');
+        if (!reason) return;
+
+        try {
+            const response = await fetch(
+                `http://localhost:8080/api/bookings/${bookingId}/reject?reason=${encodeURIComponent(reason)}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            setSuccess('❌ Booking rejected');
+            await loadBookings(); // Refresh the list
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            setError('Failed to reject booking');
+            setTimeout(() => setError(''), 3000);
+        }
+    };
+
+    const handleCompleteBooking = async (bookingId) => {
+        if (!window.confirm('Mark this session as completed?')) return;
+
+        try {
+            const response = await fetch(
+                `http://localhost:8080/api/bookings/${bookingId}/complete`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            setSuccess('✅ Session marked as completed');
+            await loadBookings();
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            setError('Failed to complete booking');
+            setTimeout(() => setError(''), 3000);
+        }
+    };
 
     const loadTutorProfile = async () => {
         try {
@@ -57,14 +167,16 @@ const TutorDashboard = () => {
             hourlyRate: parseFloat(formData.hourlyRate),
             bio: formData.bio,
             subjects: formData.subjects.split(',').map(s => s.trim()),
-            email: email,
-            name: name
+            userId: localStorage.getItem('userId')
         };
 
         try {
             const response = await fetch('http://localhost:8080/api/tutors', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(body),
             });
 
@@ -76,7 +188,6 @@ const TutorDashboard = () => {
             setSuccess('✨ Profile created successfully!');
             setShowForm(false);
             loadTutorProfile();
-
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             setError('Something went wrong. Please try again.');
@@ -107,6 +218,22 @@ const TutorDashboard = () => {
         return time.substring(0, 5);
     };
 
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login');
+    };
+
+    const getStatusBadge = (status) => {
+        const badges = {
+            'PENDING': 'badge-pending',
+            'ACCEPTED': 'badge-accepted',
+            'REJECTED': 'badge-rejected',
+            'CANCELLED': 'badge-cancelled',
+            'COMPLETED': 'badge-completed'
+        };
+        return badges[status] || 'badge-pending';
+    };
+
     return (
         <div className="dashboard-container">
             {/* Hero Section */}
@@ -123,10 +250,16 @@ const TutorDashboard = () => {
                 </div>
                 <div className="hero-stats">
                     {tutorId && (
-                        <div className="stat-card">
-                            <div className="stat-number">{availability.length}</div>
-                            <div className="stat-label">Active Slots</div>
-                        </div>
+                        <>
+                            <div className="stat-card">
+                                <div className="stat-number">{availability.length}</div>
+                                <div className="stat-label">Active Slots</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-number">{pendingBookings.length}</div>
+                                <div className="stat-label">Pending Requests</div>
+                            </div>
+                        </>
                     )}
                 </div>
             </div>
@@ -291,6 +424,51 @@ const TutorDashboard = () => {
                     </div>
                 </div>
 
+                {/* Pending Bookings Card */}
+                <div className="card booking-card">
+                    <div className="card-header">
+                        <div className="card-icon">📨</div>
+                        <h2>Pending Booking Requests</h2>
+                        <span className="pending-count">{pendingBookings.length}</span>
+                    </div>
+
+                    <div className="card-content">
+                        {pendingBookings.length === 0 && (
+                            <div className="message-box">
+                                <p>No pending booking requests</p>
+                            </div>
+                        )}
+
+                        {pendingBookings.map(booking => (
+                            <div key={booking.id} className="booking-request">
+                                <div className="booking-info">
+                                    <p><strong>Subject:</strong> {booking.subject}</p>
+                                    <p><strong>Student:</strong> {booking.studentId}</p>
+                                    <p><strong>Date:</strong> {new Date(booking.startTime).toLocaleDateString()}</p>
+                                    <p><strong>Time:</strong> {new Date(booking.startTime).toLocaleTimeString()}</p>
+                                    <p><strong>Duration:</strong> {Math.round((new Date(booking.endTime) - new Date(booking.startTime)) / 60000)} min</p>
+                                    {booking.notes && <p><strong>Notes:</strong> {booking.notes}</p>}
+                                </div>
+
+                                <div className="booking-actions">
+                                    <button
+                                        className="btn-accept"
+                                        onClick={() => handleAcceptBooking(booking.id)}
+                                    >
+                                        ✓ Accept
+                                    </button>
+                                    <button
+                                        className="btn-reject"
+                                        onClick={() => handleRejectBooking(booking.id)}
+                                    >
+                                        ✗ Reject
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Browse Tutors Card */}
                 <div className="card browse-card">
                     <div className="card-header">
@@ -304,6 +482,9 @@ const TutorDashboard = () => {
                         </p>
                         <button className="btn-primary" onClick={() => navigate('/tutors')}>
                             Browse All Tutors
+                        </button>
+                        <button className="btn-logout" onClick={handleLogout}>
+                            🚪 Logout
                         </button>
                     </div>
                 </div>
