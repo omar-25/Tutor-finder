@@ -1,444 +1,270 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import StatusBadge from '../components/StatusBadge';
 import './Booking.css';
 
 const Booking = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const tutorFromState = location.state?.tutor;
-    const preferredSlot = location.state?.preferredSlot;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const tutorFromState  = location.state?.tutor;
+  const preferredSlot   = location.state?.preferredSlot;
+  const studentId       = localStorage.getItem('userId') || localStorage.getItem('studentId');
 
-    // Get student ID from localStorage
-    const studentId = localStorage.getItem('userId') || localStorage.getItem('studentId');
+  const [formData, setFormData] = useState({
+    tutorId:   tutorFromState?.id   || '',
+    tutorName: tutorFromState?.name || '',
+    studentId: studentId || '',
+    subject:   preferredSlot?.subject || '',
+    date:      '',
+    time:      preferredSlot?.startTime?.substring(0,5) || '',
+    duration:  60,
+    notes:     '',
+  });
+  const [errors, setErrors]     = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [bookings, setBookings] = useState([]);
+  const [activeTab, setActiveTab] = useState('new');
+  const [successMsg, setSuccessMsg] = useState('');
 
-    const [formData, setFormData] = useState({
-        tutorId: tutorFromState?.id || '',
-        tutorName: tutorFromState?.name || '',
-        studentId: studentId || '',
-        subject: '',
-        date: '',
-        time: '',
-        duration: 60,
-        notes: ''
-    });
+  useEffect(() => {
+    if (studentId) fetchMyBookings();
+  }, [studentId]);
 
-    const [errors, setErrors] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
-    const [bookings, setBookings] = useState([]);
-    const [activeTab, setActiveTab] = useState('new');
+  const fetchMyBookings = async () => {
+    if (!studentId) return;
+    try {
+      const res = await fetch(`http://localhost:8080/api/bookings/student/${studentId}`, {
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (res.ok) setBookings(await res.json());
+    } catch {}
+  };
 
-    useEffect(() => {
-        if (!studentId) {
-            console.error('No student ID found. Please login again.');
-            return;
-        }
+  const validate = () => {
+    const e = {};
+    if (!formData.tutorId)  e.tutorId  = 'Please select a tutor';
+    if (!formData.subject)  e.subject  = 'Subject is required';
+    if (!formData.date)     e.date     = 'Date is required';
+    if (!formData.time)     e.time     = 'Time is required';
+    if (formData.date) {
+      const sel = new Date(formData.date); const today = new Date(); today.setHours(0,0,0,0);
+      if (sel < today) e.date = 'Cannot book in the past';
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
-        if (studentId) {
-            fetchMyBookings();
-        }
-    }, [studentId]);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(p => ({ ...p, [name]: value }));
+    if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
+  };
 
-    const fetchMyBookings = async () => {
-        if (!studentId) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    const sid = localStorage.getItem('userId');
+    if (!sid) { setErrors({ submit: 'Student ID not found. Please log in again.' }); return; }
+    setIsLoading(true);
+    setErrors(p => ({ ...p, submit: '' }));
+    try {
+      const start = new Date(`${formData.date}T${formData.time}`);
+      const end   = new Date(start.getTime() + formData.duration * 60000);
+      const res = await fetch('http://localhost:8080/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({
+          tutorId: formData.tutorId, studentId: sid,
+          subject: formData.subject, startTime: start.toISOString(),
+          endTime: end.toISOString(), totalAmount: 0, notes: formData.notes,
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || 'Booking failed');
+      setFormData(p => ({ ...p, subject:'', date:'', time:'', duration:60, notes:'' }));
+      setSuccessMsg('Session requested successfully!');
+      setActiveTab('my');
+      await fetchMyBookings();
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (err) {
+      setErrors(p => ({ ...p, submit: err.message }));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        try {
-            const response = await fetch(`http://localhost:8080/api/bookings/student/${studentId}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+  const handleCancel = async (bookingId) => {
+    if (!window.confirm('Cancel this booking?')) return;
+    try {
+      const res = await fetch(`http://localhost:8080/api/bookings/${bookingId}/cancel`, {
+        method: 'PUT', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (res.ok) { await fetchMyBookings(); setSuccessMsg('Booking cancelled.'); setTimeout(() => setSuccessMsg(''), 3000); }
+      else { const err = await res.json(); alert('Failed: ' + (err.message || 'Unknown error')); }
+    } catch { alert('Failed to cancel booking'); }
+  };
 
-            if (response.ok) {
-                const data = await response.json();
-                setBookings(data);
-            } else {
-                console.error('Failed to fetch bookings:', response.status);
-            }
-        } catch (error) {
-            console.error('Error fetching bookings:', error);
-        }
-    };
+  // Standalone page mode (navigated to directly)
+  const isStandalone = location.pathname === '/booking';
 
-    const validateForm = () => {
-        const newErrors = {};
-        if (!formData.tutorId) newErrors.tutorId = 'Please select a tutor';
-        if (!formData.subject) newErrors.subject = 'Subject is required';
-        if (!formData.date) newErrors.date = 'Date is required';
-        if (!formData.time) newErrors.time = 'Time is required';
+  return (
+    <div className={`bk-page ${isStandalone ? 'standalone' : 'embedded'}`}>
+      {isStandalone && <Navbar />}
+      <div className={isStandalone ? 'bk-wrapper container' : 'bk-embedded-wrapper'}>
 
-        if (formData.date) {
-            const selectedDate = new Date(formData.date);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            if (selectedDate < today) {
-                newErrors.date = 'Cannot book a session in the past';
-            }
-        }
+        {isStandalone && (
+          <div className="bk-header">
+            <h1 className="page-title">Book a Session</h1>
+            <p className="page-subtitle">Schedule your learning session with an expert tutor</p>
+          </div>
+        )}
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+        {/* Success toast */}
+        {successMsg && (
+          <div className="toast toast-success">{successMsg}</div>
+        )}
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: '' }));
-        }
-    };
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-
-        const studentId = localStorage.getItem('userId');
-
-        if (!studentId) {
-            setErrors({ submit: 'Student ID not found. Please log in again.' });
-            return;
-        }
-
-        setIsLoading(true);
-        setErrors(prev => ({ ...prev, submit: '' }));
-
-        try {
-            const startDateTime = new Date(`${formData.date}T${formData.time}`);
-            const endDateTime = new Date(startDateTime.getTime() + formData.duration * 60000);
-
-            const bookingData = {
-                tutorId: formData.tutorId,
-                studentId: studentId,  // ← use directly from localStorage
-                subject: formData.subject,
-                startTime: startDateTime.toISOString(),
-                endTime: endDateTime.toISOString(),
-                totalAmount: 0,
-                notes: formData.notes
-            };
-
-            console.log('Sending booking data:', bookingData);
-
-            const response = await fetch('http://localhost:8080/api/bookings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(bookingData)
-            });
-
-            const data = await response.json();
-            console.log('Response:', response.status, data);
-
-            if (!response.ok) {
-                throw new Error(data.message || data.error || 'Booking failed');
-            }
-
-            setFormData({
-                ...formData,
-                subject: '',
-                date: '',
-                time: '',
-                duration: 60,
-                notes: ''
-            });
-            setActiveTab('my');
-            await fetchMyBookings();
-            alert('Booking request sent successfully!');
-        } catch (error) {
-            console.error('Booking error:', error);
-            setErrors(prev => ({ ...prev, submit: error.message }));
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    const handleCancelBooking = async (bookingId) => {
-        if (!window.confirm('Are you sure you want to cancel this booking?')) return;
-
-        try {
-            const response = await fetch(`http://localhost:8080/api/bookings/${bookingId}/cancel`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (response.ok) {
-                await fetchMyBookings();
-                alert('Booking cancelled successfully');
-            } else {
-                const error = await response.json();
-                alert('Failed to cancel: ' + (error.message || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Cancel error:', error);
-            alert('Failed to cancel booking');
-        }
-    };
-
-    const getStatusBadge = (status) => {
-        const statusConfig = {
-            'PENDING': { class: 'status-pending', text: 'Pending' },
-            'ACCEPTED': { class: 'status-accepted', text: 'Confirmed' },
-            'REJECTED': { class: 'status-rejected', text: 'Rejected' },
-            'CANCELLED': { class: 'status-cancelled', text: 'Cancelled' },
-            'COMPLETED': { class: 'status-completed', text: 'Completed' }
-        };
-        const config = statusConfig[status] || statusConfig.PENDING;
-        return <span className={`status-badge ${config.class}`}>{config.text}</span>;
-    };
-
-    return (
-        <div className="booking-container">
-            <div className="booking-decoration">
-                <div className="decoration-circle circle-1"></div>
-                <div className="decoration-circle circle-2"></div>
-                <div className="decoration-circle circle-3"></div>
-            </div>
-
-            <div className="booking-card">
-                <div className="booking-header">
-                    <div className="booking-icon">📅</div>
-                    <h1 className="booking-title">Book a Session</h1>
-                    <p className="booking-subtitle">Schedule your learning journey</p>
-                </div>
-
-                <div className="booking-tabs">
-                    <button
-                        className={`tab-btn ${activeTab === 'new' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('new')}
-                    >
-                        ✨ New Booking
-                    </button>
-                    <button
-                        className={`tab-btn ${activeTab === 'my' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('my')}
-                    >
-                        📋 My Bookings ({bookings.length})
-                    </button>
-                </div>
-
-                {activeTab === 'new' ? (
-                    <form onSubmit={handleSubmit} className="booking-form">
-                        <div className="form-group">
-                            <label className="form-label">
-                                <span className="label-icon">👨‍🏫</span>
-                                Tutor <span className="required">*</span>
-                            </label>
-                            {tutorFromState ? (
-                                <div className="selected-tutor">
-                                    <span className="tutor-icon">👨‍🏫</span>
-                                    <div>
-                                        <strong>{formData.tutorName}</strong>
-                                        <p>ID: {formData.tutorId}</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div>
-                                    <input
-                                        type="text"
-                                        name="tutorId"
-                                        value={formData.tutorId}
-                                        onChange={handleChange}
-                                        className={`form-input ${errors.tutorId ? 'input-error' : ''}`}
-                                        placeholder="Enter Tutor ID"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="btn-find-tutor-small"
-                                        onClick={() => navigate('/tutors')}
-                                    >
-                                        Find a Tutor →
-                                    </button>
-                                </div>
-                            )}
-                            {errors.tutorId && <span className="error-message">{errors.tutorId}</span>}
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">
-                                <span className="label-icon">📖</span>
-                                Subject/Topic <span className="required">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="subject"
-                                value={formData.subject}
-                                onChange={handleChange}
-                                className={`form-input ${errors.subject ? 'input-error' : ''}`}
-                                placeholder="e.g., Mathematics, Programming, English"
-                            />
-                            {errors.subject && <span className="error-message">{errors.subject}</span>}
-                        </div>
-
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label className="form-label">
-                                    <span className="label-icon">📅</span>
-                                    Date <span className="required">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={handleChange}
-                                    className={`form-input ${errors.date ? 'input-error' : ''}`}
-                                    min={new Date().toISOString().split('T')[0]}
-                                />
-                                {errors.date && <span className="error-message">{errors.date}</span>}
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">
-                                    <span className="label-icon">⏰</span>
-                                    Time <span className="required">*</span>
-                                </label>
-                                <input
-                                    type="time"
-                                    name="time"
-                                    value={formData.time}
-                                    onChange={handleChange}
-                                    className={`form-input ${errors.time ? 'input-error' : ''}`}
-                                />
-                                {errors.time && <span className="error-message">{errors.time}</span>}
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">
-                                    <span className="label-icon">⏱️</span>
-                                    Duration
-                                </label>
-                                <select
-                                    name="duration"
-                                    value={formData.duration}
-                                    onChange={handleChange}
-                                    className="form-input"
-                                >
-                                    <option value={30}>30 minutes</option>
-                                    <option value={60}>1 hour</option>
-                                    <option value={90}>1.5 hours</option>
-                                    <option value={120}>2 hours</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">
-                                <span className="label-icon">📝</span>
-                                Notes (Optional)
-                            </label>
-                            <textarea
-                                name="notes"
-                                value={formData.notes}
-                                onChange={handleChange}
-                                className="form-textarea"
-                                placeholder="Any specific topics or requirements for this session..."
-                                rows="3"
-                            />
-                        </div>
-
-                        {errors.submit && <div className="submit-error">{errors.submit}</div>}
-
-                        <button type="submit" className="booking-button" disabled={isLoading}>
-                            {isLoading ? (
-                                <>
-                                    <span className="spinner"></span>
-                                    Booking...
-                                </>
-                            ) : (
-                                <>
-                                    <span>✨</span>
-                                    Request Session
-                                    <span>→</span>
-                                </>
-                            )}
-                        </button>
-                    </form>
-                ) : (
-                    <div className="my-bookings">
-                        {bookings.length === 0 ? (
-                            <div className="no-bookings">
-                                <div className="no-bookings-icon">📅</div>
-                                <h3>No Bookings Yet</h3>
-                                <p>You haven't booked any sessions yet. Create your first booking!</p>
-                                <button
-                                    className="btn-create-booking"
-                                    onClick={() => setActiveTab('new')}
-                                >
-                                    + Create a Booking
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="bookings-list">
-                                {bookings.map(booking => (
-                                    <div key={booking.id} className="booking-item">
-                                        <div className="booking-item-header">
-                                            <h3>{booking.subject}</h3>
-                                            {getStatusBadge(booking.status)}
-                                        </div>
-                                        <div className="booking-item-details">
-                                            <div className="detail">
-                                                <span className="detail-icon">👨‍🏫</span>
-                                                <span>Tutor ID: {booking.tutorId}</span>
-                                            </div>
-                                            <div className="detail">
-                                                <span className="detail-icon">📅</span>
-                                                {/* FIXED: Use startTime instead of scheduledTime */}
-                                                <span>{new Date(booking.startTime).toLocaleDateString()}</span>
-                                            </div>
-                                            <div className="detail">
-                                                <span className="detail-icon">⏰</span>
-                                                {/* FIXED: Use startTime instead of scheduledTime */}
-                                                <span>{new Date(booking.startTime).toLocaleTimeString()}</span>
-                                            </div>
-                                            <div className="detail">
-                                                <span className="detail-icon">⏱️</span>
-                                                <span>
-                                                    {Math.round((new Date(booking.endTime) - new Date(booking.startTime)) / 60000)} minutes
-                                                </span>
-                                            </div>
-                                            {booking.notes && (
-                                                <div className="detail notes">
-                                                    <span className="detail-icon">📝</span>
-                                                    <span>{booking.notes}</span>
-                                                </div>
-                                            )}
-                                            {booking.rejectionReason && (
-                                                <div className="detail rejection">
-                                                    <span className="detail-icon">⚠️</span>
-                                                    <span>Reason: {booking.rejectionReason}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        {(booking.status === 'PENDING' || booking.status === 'ACCEPTED') && (
-                                            <div className="booking-item-actions">
-                                                <button
-                                                    className="btn-cancel-booking"
-                                                    onClick={() => handleCancelBooking(booking.id)}
-                                                >
-                                                    Cancel {booking.status === 'PENDING' ? 'Request' : 'Session'}
-                                                </button>
-                                            </div>
-                                        )}
-                                        {booking.status === 'ACCEPTED' && (
-                                            <div className="booking-item-actions">
-                                                <button className="btn-join-session">Join Session →</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                <div className="booking-footer">
-                    <p className="booking-note">
-                        💡 Need help? <a href="/contact" className="help-link">Contact Support</a>
-                    </p>
-                </div>
-            </div>
+        {/* Tabs */}
+        <div className="tabs" style={{ marginBottom: 'var(--space-6)' }}>
+          <button className={`tab-btn ${activeTab === 'new' ? 'active' : ''}`} onClick={() => setActiveTab('new')}>
+            New Booking
+          </button>
+          <button className={`tab-btn ${activeTab === 'my' ? 'active' : ''}`} onClick={() => setActiveTab('my')}>
+            My Bookings {bookings.length > 0 && <span className="bk-count">{bookings.length}</span>}
+          </button>
         </div>
-    );
+
+        {/* New booking form */}
+        {activeTab === 'new' && (
+          <div className="card card-padding animate-fade-in">
+            <form onSubmit={handleSubmit} className="bk-form">
+              {/* Tutor field */}
+              <div className="form-group">
+                <label className="form-label">Tutor *</label>
+                {tutorFromState ? (
+                  <div className="bk-selected-tutor">
+                    <div className="bk-tutor-avatar">{formData.tutorName?.charAt(0) || 'T'}</div>
+                    <div>
+                      <div className="bk-tutor-name">{formData.tutorName}</div>
+                      <div className="bk-tutor-id">ID: {formData.tutorId}</div>
+                    </div>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => navigate('/tutors')}>
+                      Change
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+                    <input name="tutorId" value={formData.tutorId} onChange={handleChange}
+                      className={`form-input ${errors.tutorId ? 'input-error' : ''}`} placeholder="Enter Tutor ID" />
+                    <button type="button" className="btn btn-outline btn-sm" onClick={() => navigate('/tutors')} style={{whiteSpace:'nowrap'}}>
+                      Browse Tutors
+                    </button>
+                  </div>
+                )}
+                {errors.tutorId && <span className="error-message">{errors.tutorId}</span>}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Subject / Topic *</label>
+                <input name="subject" value={formData.subject} onChange={handleChange}
+                  className={`form-input ${errors.subject ? 'input-error' : ''}`}
+                  placeholder="e.g., Mathematics, Programming, English" />
+                {errors.subject && <span className="error-message">{errors.subject}</span>}
+              </div>
+
+              <div className="bk-row-3">
+                <div className="form-group">
+                  <label className="form-label">Date *</label>
+                  <input type="date" name="date" value={formData.date} onChange={handleChange}
+                    className={`form-input ${errors.date ? 'input-error' : ''}`}
+                    min={new Date().toISOString().split('T')[0]} />
+                  {errors.date && <span className="error-message">{errors.date}</span>}
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Time *</label>
+                  <input type="time" name="time" value={formData.time} onChange={handleChange}
+                    className={`form-input ${errors.time ? 'input-error' : ''}`} />
+                  {errors.time && <span className="error-message">{errors.time}</span>}
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Duration</label>
+                  <select name="duration" value={formData.duration} onChange={handleChange} className="form-input">
+                    <option value={30}>30 minutes</option>
+                    <option value={60}>1 hour</option>
+                    <option value={90}>1.5 hours</option>
+                    <option value={120}>2 hours</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Notes (Optional)</label>
+                <textarea name="notes" value={formData.notes} onChange={handleChange}
+                  className="form-textarea" rows="3"
+                  placeholder="Any specific topics or requirements for this session…" />
+              </div>
+
+              {errors.submit && <div className="submit-error">{errors.submit}</div>}
+
+              <button type="submit" className="btn btn-primary btn-full" disabled={isLoading}>
+                {isLoading ? <><span className="spinner" /> Requesting…</> : 'Request Session →'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* My bookings */}
+        {activeTab === 'my' && (
+          <div className="animate-fade-in">
+            {bookings.length === 0 ? (
+              <div className="empty-state card">
+                <div className="empty-state-icon">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <h3>No Bookings Yet</h3>
+                <p>You haven't booked any sessions. Create your first one!</p>
+                <button className="btn btn-primary btn-sm" onClick={() => setActiveTab('new')}>
+                  Book a Session
+                </button>
+              </div>
+            ) : (
+              <div className="bk-list">
+                {bookings.map(b => (
+                  <div key={b.id} className="bk-item card card-padding">
+                    <div className="bk-item-header">
+                      <div>
+                        <h3 className="bk-item-subject">{b.subject}</h3>
+                        <span className="bk-item-id">Tutor #{b.tutorId}</span>
+                      </div>
+                      <StatusBadge status={b.status} />
+                    </div>
+                    <div className="bk-item-details">
+                      <span>📅 {new Date(b.startTime).toLocaleDateString()}</span>
+                      <span>⏰ {new Date(b.startTime).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
+                      <span>⏱️ {Math.round((new Date(b.endTime) - new Date(b.startTime)) / 60000)} min</span>
+                    </div>
+                    {b.notes && <p className="bk-item-notes">📝 {b.notes}</p>}
+                    {b.rejectionReason && <p className="bk-item-reject">⚠️ {b.rejectionReason}</p>}
+                    <div className="bk-item-actions">
+                      {b.status === 'ACCEPTED' && (
+                        <button className="btn btn-primary btn-sm">Join Session →</button>
+                      )}
+                      {(b.status === 'PENDING' || b.status === 'ACCEPTED') && (
+                        <button className="btn btn-danger btn-sm" onClick={() => handleCancel(b.id)}>
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Booking;
