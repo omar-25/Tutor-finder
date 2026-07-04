@@ -1,401 +1,297 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import './Register.css';
 
 const Register = () => {
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        password: '',
-        confirmPassword: '',
-        role: 'STUDENT',
-        agreeToTerms: false
-    });
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    firstName: '', lastName: '', email: '', phoneNumber: '',
+    password: '', confirmPassword: '', role: 'STUDENT', agreeToTerms: false
+  });
+  const [errors, setErrors]           = useState({});
+  const [isLoading, setIsLoading]     = useState(false);
+  const [showPassword, setShowPassword]        = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
-    const [errors, setErrors] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [passwordStrength, setPasswordStrength] = useState(0);
+  const calcStrength = (pw) => {
+    let s = 0;
+    if (pw.length >= 8)              s++;
+    if (/[a-z]/.test(pw))            s++;
+    if (/[A-Z]/.test(pw))            s++;
+    if (/[0-9]/.test(pw))            s++;
+    if (/[$@#&!]/.test(pw))          s++;
+    return s;
+  };
 
-    const calculatePasswordStrength = (password) => {
-        let strength = 0;
-        if (password.length >= 8) strength++;
-        if (password.match(/[a-z]+/)) strength++;
-        if (password.match(/[A-Z]+/)) strength++;
-        if (password.match(/[0-9]+/)) strength++;
-        if (password.match(/[$@#&!]+/)) strength++;
-        return strength;
-    };
+  const strengthLabel = ['', 'Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+  const strengthColor = ['', '#EF4444','#EF4444','#F59E0B','#10B981','#3B4ADB'];
 
-    const handlePasswordChange = (e) => {
-        const password = e.target.value;
-        setFormData(prev => ({ ...prev, password }));
-        setPasswordStrength(calculatePasswordStrength(password));
-        if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
-    };
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const val = type === 'checkbox' ? checked : value;
+    setFormData(p => ({ ...p, [name]: val }));
+    if (name === 'password') setPasswordStrength(calcStrength(value));
+    if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
+  };
 
-    const getPasswordStrengthText = () => {
-        if (passwordStrength === 0) return '';
-        if (passwordStrength <= 2) return { text: 'Weak', class: 'weak' };
-        if (passwordStrength <= 3) return { text: 'Fair', class: 'fair' };
-        if (passwordStrength <= 4) return { text: 'Good', class: 'good' };
-        return { text: 'Strong', class: 'strong' };
-    };
+  const validateStep1 = () => {
+    const e = {};
+    if (!formData.firstName.trim()) e.firstName = 'Required';
+    if (!formData.lastName.trim())  e.lastName  = 'Required';
+    if (!formData.email.trim()) {
+      e.email = 'Required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      e.email = 'Enter a valid email';
+    }
+    if (!formData.phoneNumber.trim()) {
+      e.phoneNumber = 'Required';
+    } else if (formData.phoneNumber.replace(/\D/g,'').length < 8) {
+      e.phoneNumber = 'Enter a valid phone number';
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
-    const validateForm = () => {
-        const newErrors = {};
+  const validateStep2 = () => {
+    const e = {};
+    if (!formData.password) {
+      e.password = 'Required';
+    } else if (formData.password.length < 8) {
+      e.password = 'At least 8 characters';
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      e.password = 'Need uppercase, lowercase, and a number';
+    }
+    if (formData.password !== formData.confirmPassword) {
+      e.confirmPassword = 'Passwords do not match';
+    }
+    if (!formData.agreeToTerms) e.agreeToTerms = 'Please accept the terms';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
-        if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-        if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+  const handleNext = () => {
+    if (validateStep1()) setStep(2);
+  };
 
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Please enter a valid email address';
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateStep2()) return;
+    setIsLoading(true);
+    setErrors(p => ({ ...p, submit: '' }));
+    try {
+      const res = await fetch('http://localhost:8080/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName:  formData.lastName,
+          email:     formData.email,
+          phoneNumber: formData.phoneNumber,
+          password:  formData.password,
+          role:      formData.role,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Registration failed. Please try again.');
 
-        if (!formData.phoneNumber.trim()) {
-            newErrors.phoneNumber = 'Phone number is required';
-        } else if (formData.phoneNumber.replace(/\D/g, '').length < 8) {
-            newErrors.phoneNumber = 'Please enter a valid phone number';
-        }
+      localStorage.clear();
+      localStorage.setItem('token',     data.token);
+      localStorage.setItem('userEmail', data.email);
+      localStorage.setItem('userRole',  data.role);
 
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        } else if (formData.password.length < 8) {
-            newErrors.password = 'Password must be at least 8 characters';
-        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-            newErrors.password = 'Must contain uppercase, lowercase, and a number';
-        }
+      const userRes = await fetch(`http://localhost:8080/api/users/email/${data.email}`, {
+        headers: { 'Authorization': `Bearer ${data.token}` }
+      });
+      if (userRes.ok) {
+        const ud = await userRes.json();
+        localStorage.setItem('userId',        ud.id);
+        localStorage.setItem('userFirstName', ud.firstName);
+        localStorage.setItem('userLastName',  ud.lastName);
+        localStorage.setItem('userPhone',     ud.phoneNumber);
+        localStorage.setItem('userName',      `${ud.firstName} ${ud.lastName}`);
+      }
 
-        if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Passwords do not match';
-        }
+      navigate(formData.role === 'STUDENT' ? '/student/dashboard' : '/tutor/dashboard');
+    } catch (err) {
+      setErrors(p => ({ ...p, submit: err.message || 'Cannot connect to server.' }));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        if (!formData.agreeToTerms) {
-            newErrors.agreeToTerms = 'You must agree to the Terms and Conditions';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        const targetValue = type === 'checkbox' ? checked : value;
-
-        setFormData(prev => ({
-            ...prev,
-            [name]: targetValue
-        }));
-
-        if (errors[name] && (type !== 'checkbox' || checked === true)) {
-            setErrors(prev => ({ ...prev, [name]: '' }));
-        }
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-
-        setIsLoading(true);
-        setErrors(prev => ({ ...prev, submit: '' }));
-
-        try {
-            const registrationData = {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                phoneNumber: formData.phoneNumber,
-                password: formData.password,
-                role: formData.role
-            };
-
-            const response = await fetch('http://localhost:8080/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(registrationData),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Registration failed. Please try again.');
-            }
-
-            // Clear old localStorage data first
-            localStorage.clear();
-
-            // Store auth data
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userEmail', data.email);
-            localStorage.setItem('userRole', data.role);
-
-            // Fetch user profile to get ID
-            const userResponse = await fetch(`http://localhost:8080/api/users/email/${data.email}`, {
-                headers: { 'Authorization': `Bearer ${data.token}` }
-            });
-
-            if (userResponse.ok) {
-                const userData = await userResponse.json();
-                localStorage.setItem('userId', userData.id);
-                localStorage.setItem('userFirstName', userData.firstName);
-                localStorage.setItem('userLastName', userData.lastName);
-                localStorage.setItem('userPhone', userData.phoneNumber);
-                localStorage.setItem('userName', userData.firstName + ' ' + userData.lastName);
-            }
-
-            if (formData.role === 'STUDENT') {
-                navigate('/student/dashboard');
-            } else {
-                navigate('/tutor/dashboard');
-            }
-
-        } catch (error) {
-            setErrors(prev => ({ ...prev, submit: error.message || 'Cannot connect to server.' }));
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    const strength = getPasswordStrengthText();
-
-    return (
-        <div className="register-container">
-            <div className="register-decoration">
-                <div className="decoration-circle circle-1"></div>
-                <div className="decoration-circle circle-2"></div>
-                <div className="decoration-circle circle-3"></div>
+  return (
+    <div className="auth-page">
+      <Navbar />
+      <div className="auth-container">
+        {/* Left panel */}
+        <div className="auth-panel auth-panel-left">
+          <div className="auth-panel-content">
+            <div className="auth-panel-logo">
+              <div className="auth-panel-logo-icon">Y</div>
+              <span>YalaDars</span>
             </div>
-
-            <div className="register-card">
-                <div className="register-header">
-                    <div className="register-icon">✨</div>
-                    <h1 className="register-title">Create Account</h1>
-                    <p className="register-subtitle">Join our community of learners and educators</p>
+            <h2>Start your learning journey today.</h2>
+            <p>Join thousands of students and tutors connecting on YalaDars.</p>
+            <div className="auth-panel-features">
+              {['Verified expert tutors', 'Flexible scheduling', 'Secure payments', 'Real-time notifications'].map(f => (
+                <div key={f} className="auth-panel-feature">
+                  <div className="auth-feature-check">✓</div>
+                  <span>{f}</span>
                 </div>
-
-                <form onSubmit={handleSubmit} className="register-form">
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label className="form-label">
-                                <span className="label-icon">👤</span>
-                                First Name <span className="required">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                className={`form-input ${errors.firstName ? 'input-error' : ''}`}
-                                placeholder="Enter your first name"
-                            />
-                            {errors.firstName && <span className="error-message">{errors.firstName}</span>}
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">
-                                <span className="label-icon">👤</span>
-                                Last Name <span className="required">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                className={`form-input ${errors.lastName ? 'input-error' : ''}`}
-                                placeholder="Enter your last name"
-                            />
-                            {errors.lastName && <span className="error-message">{errors.lastName}</span>}
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">
-                            <span className="label-icon">📧</span>
-                            Email Address <span className="required">*</span>
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className={`form-input ${errors.email ? 'input-error' : ''}`}
-                            placeholder="you@example.com"
-                        />
-                        {errors.email && <span className="error-message">{errors.email}</span>}
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">
-                            <span className="label-icon">📱</span>
-                            Phone Number <span className="required">*</span>
-                        </label>
-                        <input
-                            type="tel"
-                            name="phoneNumber"
-                            value={formData.phoneNumber}
-                            onChange={handleChange}
-                            className={`form-input ${errors.phoneNumber ? 'input-error' : ''}`}
-                            placeholder="+1 (555) 000-0000"
-                        />
-                        {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">
-                            <span className="label-icon">🔒</span>
-                            Password <span className="required">*</span>
-                        </label>
-                        <div className="password-wrapper">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                name="password"
-                                value={formData.password}
-                                onChange={handlePasswordChange}
-                                className={`form-input ${errors.password ? 'input-error' : ''}`}
-                                placeholder="Create a strong password"
-                            />
-                            <button
-                                type="button"
-                                className="password-toggle"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? "👁️" : "👁️‍🗨️"}
-                            </button>
-                        </div>
-                        {formData.password && (
-                            <div className="password-strength">
-                                <div className={`strength-bar ${strength.class}`} style={{ width: `${(passwordStrength / 5) * 100}%` }}></div>
-                                <span className={`strength-text ${strength.class}`}>{strength.text}</span>
-                            </div>
-                        )}
-                        {errors.password && <span className="error-message">{errors.password}</span>}
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">
-                            <span className="label-icon">🔒</span>
-                            Confirm Password <span className="required">*</span>
-                        </label>
-                        <div className="password-wrapper">
-                            <input
-                                type={showConfirmPassword ? "text" : "password"}
-                                name="confirmPassword"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                className={`form-input ${errors.confirmPassword ? 'input-error' : ''}`}
-                                placeholder="Confirm your password"
-                            />
-                            <button
-                                type="button"
-                                className="password-toggle"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            >
-                                {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
-                            </button>
-                        </div>
-                        {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">
-                            <span className="label-icon">🎯</span>
-                            I want to join as <span className="required">*</span>
-                        </label>
-                        <div className="role-selector">
-                            <button
-                                type="button"
-                                className={`role-btn ${formData.role === 'STUDENT' ? 'active' : ''}`}
-                                onClick={() => setFormData(prev => ({ ...prev, role: 'STUDENT' }))}
-                            >
-                                <span className="role-icon">📚</span>
-                                <div className="role-content">
-                                    <span className="role-title">Student</span>
-                                    <span className="role-desc">Find tutors and learn</span>
-                                </div>
-                            </button>
-                            <button
-                                type="button"
-                                className={`role-btn ${formData.role === 'TUTOR' ? 'active' : ''}`}
-                                onClick={() => setFormData(prev => ({ ...prev, role: 'TUTOR' }))}
-                            >
-                                <span className="role-icon">👨‍🏫</span>
-                                <div className="role-content">
-                                    <span className="role-title">Tutor</span>
-                                    <span className="role-desc">Share knowledge and earn</span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="form-group checkbox-group">
-                        <label className="checkbox-label">
-                            <input
-                                type="checkbox"
-                                name="agreeToTerms"
-                                checked={formData.agreeToTerms}
-                                onChange={handleChange}
-                                className="checkbox-input"
-                            />
-                            <span className="checkbox-text">
-                                I agree to the <Link to="/terms" className="link">Terms and Conditions</Link> and <Link to="/privacy" className="link">Privacy Policy</Link>
-                            </span>
-                        </label>
-                        {errors.agreeToTerms && <span className="error-message">{errors.agreeToTerms}</span>}
-                    </div>
-
-                    {errors.submit && <div className="submit-error">{errors.submit}</div>}
-
-                    <button type="submit" className="register-button" disabled={isLoading}>
-                        {isLoading ? (
-                            <>
-                                <span className="spinner"></span>
-                                Creating Account...
-                            </>
-                        ) : (
-                            <>
-                                <span>✨</span>
-                                Create Account
-                                <span>→</span>
-                            </>
-                        )}
-                    </button>
-
-                    <div className="register-footer">
-                        <p className="login-prompt">
-                            Already have an account? <Link to="/login" className="login-link">Sign in here</Link>
-                        </p>
-                    </div>
-                </form>
-
-                <div className="register-divider">
-                    <span className="divider-text">or continue with</span>
-                </div>
-
-                <div className="social-registration">
-                    <button type="button" className="social-button google">
-                        <svg className="social-icon" viewBox="0 0 24 24">
-                            <path fill="#EA4335" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#4285F4" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#34A853" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Google
-                    </button>
-                    <button type="button" className="social-button facebook">
-                        <svg className="social-icon" viewBox="0 0 24 24">
-                            <path fill="#1877F2" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.96h-1.51c-1.49 0-1.95.93-1.95 1.88v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/>
-                        </svg>
-                        Facebook
-                    </button>
-                </div>
+              ))}
             </div>
+          </div>
         </div>
-    );
+
+        {/* Right panel — form */}
+        <div className="auth-panel auth-panel-right">
+          <div className="auth-form-wrapper">
+            <div className="auth-form-header">
+              <h1 className="auth-form-title">Create Account</h1>
+              <p className="auth-form-subtitle">Already have one? <Link to="/login">Sign in</Link></p>
+            </div>
+
+            {/* Step indicator */}
+            <div className="auth-steps">
+              <div className={`auth-step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'done' : ''}`}>
+                <div className="auth-step-dot">1</div>
+                <span>Info</span>
+              </div>
+              <div className="auth-step-line" />
+              <div className={`auth-step ${step >= 2 ? 'active' : ''}`}>
+                <div className="auth-step-dot">2</div>
+                <span>Security</span>
+              </div>
+            </div>
+
+            {/* Role selector — always visible */}
+            <div className="role-selector">
+              {[
+                { value: 'STUDENT', label: 'Student', icon: '🎓', desc: 'Find tutors & learn' },
+                { value: 'TUTOR',   label: 'Tutor',   icon: '👨‍🏫', desc: 'Share knowledge & earn' },
+              ].map(r => (
+                <button
+                  key={r.value}
+                  type="button"
+                  className={`role-btn ${formData.role === r.value ? 'active' : ''}`}
+                  onClick={() => setFormData(p => ({ ...p, role: r.value }))}
+                >
+                  <span className="role-icon">{r.icon}</span>
+                  <span className="role-label">{r.label}</span>
+                  <span className="role-desc">{r.desc}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Step 1 */}
+            {step === 1 && (
+              <div className="auth-step-content animate-fade-in">
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label className="form-label">First Name *</label>
+                    <input name="firstName" value={formData.firstName} onChange={handleChange}
+                      className={`form-input ${errors.firstName ? 'input-error' : ''}`} placeholder="Ahmed" />
+                    {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Last Name *</label>
+                    <input name="lastName" value={formData.lastName} onChange={handleChange}
+                      className={`form-input ${errors.lastName ? 'input-error' : ''}`} placeholder="Khalil" />
+                    {errors.lastName && <span className="error-message">{errors.lastName}</span>}
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email Address *</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleChange}
+                    className={`form-input ${errors.email ? 'input-error' : ''}`} placeholder="you@example.com" />
+                  {errors.email && <span className="error-message">{errors.email}</span>}
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Phone Number *</label>
+                  <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange}
+                    className={`form-input ${errors.phoneNumber ? 'input-error' : ''}`} placeholder="+20 1xx xxx xxxx" />
+                  {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
+                </div>
+                <button type="button" className="btn btn-primary btn-full" onClick={handleNext}>
+                  Continue →
+                </button>
+              </div>
+            )}
+
+            {/* Step 2 */}
+            {step === 2 && (
+              <form onSubmit={handleSubmit} className="auth-step-content animate-fade-in">
+                <div className="form-group">
+                  <label className="form-label">Password *</label>
+                  <div className="password-wrapper">
+                    <input type={showPassword ? 'text' : 'password'} name="password"
+                      value={formData.password} onChange={handleChange}
+                      className={`form-input ${errors.password ? 'input-error' : ''}`}
+                      placeholder="Create a strong password" />
+                    <button type="button" className="password-toggle" onClick={() => setShowPassword(p => !p)}>
+                      {showPassword
+                        ? <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        : <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      }
+                    </button>
+                  </div>
+                  {formData.password && (
+                    <div className="pw-strength">
+                      <div className="pw-bars">
+                        {[1,2,3,4,5].map(i => (
+                          <div key={i} className="pw-bar"
+                            style={{ background: i <= passwordStrength ? strengthColor[passwordStrength] : 'var(--gray-200)' }} />
+                        ))}
+                      </div>
+                      <span style={{ fontSize: '11px', color: strengthColor[passwordStrength] }}>
+                        {strengthLabel[passwordStrength]}
+                      </span>
+                    </div>
+                  )}
+                  {errors.password && <span className="error-message">{errors.password}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Confirm Password *</label>
+                  <div className="password-wrapper">
+                    <input type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword"
+                      value={formData.confirmPassword} onChange={handleChange}
+                      className={`form-input ${errors.confirmPassword ? 'input-error' : ''}`}
+                      placeholder="Confirm your password" />
+                    <button type="button" className="password-toggle" onClick={() => setShowConfirmPassword(p => !p)}>
+                      {showConfirmPassword
+                        ? <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        : <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      }
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                </div>
+
+                <label className="checkbox-label">
+                  <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} />
+                  <span>I agree to the <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link></span>
+                </label>
+                {errors.agreeToTerms && <span className="error-message">{errors.agreeToTerms}</span>}
+
+                {errors.submit && <div className="submit-error">{errors.submit}</div>}
+
+                <div className="auth-step-nav">
+                  <button type="button" className="btn btn-outline" onClick={() => setStep(1)}>← Back</button>
+                  <button type="submit" className="btn btn-primary" disabled={isLoading}>
+                    {isLoading ? <><span className="spinner" />Creating...</> : 'Create Account'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Register;

@@ -1,271 +1,205 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import './TutorDetails.css';
 
-const TutorDetail = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [tutor, setTutor] = useState(null);
-    const [availability, setAvailability] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedDay, setSelectedDay] = useState('all');
-    const [showBookingModal, setShowBookingModal] = useState(false);
-    const [selectedSlot, setSelectedSlot] = useState(null);
+const DAYS = ['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'];
 
-    useEffect(() => {
-        fetch(`http://localhost:8080/api/tutors/${id}`)
-            .then(res => res.json())
-            .then(data => { setTutor(data); setLoading(false); })
-            .catch(err => { console.error(err); setLoading(false); });
+const TutorDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [tutor, setTutor]           = useState(null);
+  const [availability, setAvailability] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [selectedDay, setSelectedDay] = useState('all');
+  const [showModal, setShowModal]   = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
 
-        fetch(`http://localhost:8080/api/availability/tutor/${id}`)
-            .then(res => res.json())
-            .then(data => setAvailability(data))
-            .catch(err => console.error(err));
-    }, [id]);
+  useEffect(() => {
+    Promise.all([
+      fetch(`http://localhost:8080/api/tutors/${id}`).then(r => r.json()),
+      fetch(`http://localhost:8080/api/availability/tutor/${id}`).then(r => r.json()),
+    ])
+      .then(([t, a]) => { setTutor(t); setAvailability(a); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [id]);
 
-    const daysOfWeek = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  const filtered = selectedDay === 'all'
+    ? availability
+    : availability.filter(s => s.dayOfTheWeek === selectedDay);
 
-    const filteredAvailability = selectedDay === 'all'
-        ? availability
-        : availability.filter(slot => slot.dayOfTheWeek === selectedDay);
+  const handleBook = (slot) => { setSelectedSlot(slot); setShowModal(true); };
+  const closeModal = () => { setShowModal(false); setSelectedSlot(null); };
 
-    const handleBookSession = (slot) => {
-        setSelectedSlot(slot);
-        setShowBookingModal(true);
-    };
+  const confirmBooking = () => {
+    closeModal();
+    navigate('/booking', {
+      state: {
+        tutor: { id: tutor.tutorId, name: tutor.name },
+        preferredSlot: selectedSlot ? {
+          day: selectedSlot.dayOfTheWeek,
+          startTime: selectedSlot.startTime,
+          endTime: selectedSlot.endTime,
+          subject: selectedSlot.subject,
+        } : null,
+      }
+    });
+  };
 
-    const closeModal = () => {
-        setShowBookingModal(false);
-        setSelectedSlot(null);
-    };
+  if (loading) return (
+    <div className="td-page"><Navbar />
+      <div className="td-loading-wrap">
+        <div className="spinner spinner-dark" style={{width:36,height:36}} />
+        <p>Loading tutor profile…</p>
+      </div>
+    </div>
+  );
 
-    // In TutorDetail.jsx, replace the confirmBooking and modal with this:
+  if (!tutor) return (
+    <div className="td-page"><Navbar />
+      <div className="empty-state" style={{marginTop: 120}}>
+        <div className="empty-state-icon">😕</div>
+        <h3>Tutor Not Found</h3>
+        <p>This tutor doesn't exist or has been removed.</p>
+        <button className="btn btn-outline" onClick={() => navigate('/tutors')}>Browse Tutors</button>
+      </div>
+    </div>
+  );
 
+  return (
+    <div className="td-page">
+      <Navbar />
+      <div className="td-wrapper">
+        <div className="container">
+          <button className="btn btn-ghost btn-sm td-back" onClick={() => navigate('/tutors')}>
+            ← Back to Tutors
+          </button>
 
-// Replace the confirmBooking function with:
-    const confirmBooking = () => {
-        // Close modal and navigate to booking page with tutor and slot info
-        closeModal();
-        navigate('/booking', {
-            state: {
-                tutor: {
-                    id: tutor.tutorId,
-                    name: tutor.name
-                },
-                preferredSlot: selectedSlot ? {
-                    day: selectedSlot.dayOfTheWeek,
-                    startTime: selectedSlot.startTime,
-                    endTime: selectedSlot.endTime,
-                    subject: selectedSlot.subject
-                } : null
-            }
-        });
-    };
-
-
-
-
-    if (loading) {
-        return (
-            <div className="detail-page">
-                <div className="detail-loader-container">
-                    <div className="detail-spinner"></div>
-                    <p className="detail-loading-text">Loading tutor profile...</p>
-                </div>
+          {/* Profile header */}
+          <div className="td-hero card card-padding">
+            <div className="td-hero-avatar">
+              {tutor.name ? tutor.name.charAt(0).toUpperCase() : 'T'}
             </div>
-        );
-    }
-
-    if (!tutor) {
-        return (
-            <div className="detail-page">
-                <div className="detail-error-container">
-                    <div className="detail-error-icon">😕</div>
-                    <h2 className="detail-error-title">Tutor Not Found</h2>
-                    <p className="detail-error-text">The tutor you're looking for doesn't exist or has been removed.</p>
-                    <button className="detail-back-btn" onClick={() => navigate('/tutors')}>
-                        ← Browse Other Tutors
-                    </button>
+            <div className="td-hero-info">
+              <div className="badge badge-accepted" style={{width:'fit-content',marginBottom:8}}>✓ Verified Tutor</div>
+              <h1 className="td-hero-name">{tutor.name || 'Expert Tutor'}</h1>
+              <p className="td-hero-bio">{tutor.bio}</p>
+              <div className="td-hero-meta">
+                <div className="td-meta-item">
+                  <span className="td-meta-label">Rating</span>
+                  <span className="td-meta-value">⭐ 4.9 <span style={{color:'var(--text-muted)',fontWeight:400}}>(127 reviews)</span></span>
                 </div>
+                <div className="td-meta-divider" />
+                <div className="td-meta-item">
+                  <span className="td-meta-label">Hourly Rate</span>
+                  <span className="td-meta-value">${tutor.hourlyRate}<span style={{color:'var(--text-muted)',fontWeight:400}}>/hr</span></span>
+                </div>
+                <div className="td-meta-divider" />
+                <div className="td-meta-item">
+                  <span className="td-meta-label">Subjects</span>
+                  <span className="td-meta-value">{tutor.subjects?.length || 0}</span>
+                </div>
+                <div className="td-meta-divider" />
+                <div className="td-meta-item">
+                  <span className="td-meta-label">Available Slots</span>
+                  <span className="td-meta-value">{availability.length}</span>
+                </div>
+              </div>
             </div>
-        );
-    }
+            <div className="td-hero-action">
+              <button className="btn btn-primary btn-lg" onClick={() => navigate('/booking', { state: { tutor: { id: tutor.tutorId, name: tutor.name } } })}>
+                Book a Session
+              </button>
+            </div>
+          </div>
 
-    return (
-        <div className="detail-page">
-            {/* Back Button */}
-            <button className="detail-back-btn" onClick={() => navigate('/tutors')}>
-                ← Back to Tutors
-            </button>
-
-            {/* Tutor Profile Header */}
-            <div className="detail-profile-header">
-                <div className="detail-avatar-section">
-                    <div className="detail-avatar">
-                        <span className="detail-avatar-emoji">👨‍🏫</span>
-                    </div>
-                    <div className="detail-rating">
-                        <span className="detail-stars">★★★★★</span>
-                        <span className="detail-rating-score">4.9</span>
-                        <span className="detail-review-count">(127 reviews)</span>
-                    </div>
-                </div>
-                <div className="detail-header-content">
-                    <div className="detail-badge">Verified Tutor</div>
-                    <h1 className="detail-name">{tutor.name || 'Expert Tutor'}</h1>
-                    <p className="detail-bio-text">{tutor.bio}</p>
-                    <div className="detail-stats-grid">
-                        <div className="detail-stat">
-                            <div className="detail-stat-value">${tutor.hourlyRate}</div>
-                            <div className="detail-stat-label">/hour</div>
-                        </div>
-                        <div className="detail-stat">
-                            <div className="detail-stat-value">{tutor.subjects?.length || 0}</div>
-                            <div className="detail-stat-label">Subjects</div>
-                        </div>
-                        <div className="detail-stat">
-                            <div className="detail-stat-value">{availability.length}</div>
-                            <div className="detail-stat-label">Available Slots</div>
-                        </div>
-                        <div className="detail-stat">
-                            <div className="detail-stat-value">500+</div>
-                            <div className="detail-stat-label">Students</div>
-                        </div>
-                    </div>
-                </div>
+          <div className="td-content">
+            {/* Subjects */}
+            <div className="card card-padding td-section">
+              <h2 className="section-title">Subjects Taught</h2>
+              <div className="td-subjects">
+                {tutor.subjects?.map((s, i) => (
+                  <div key={i} className="td-subject-chip">{s}</div>
+                ))}
+              </div>
             </div>
 
-            {/* Subjects Section */}
-            <div className="detail-section">
-                <div className="detail-section-header">
-                    <h2 className="detail-section-title">📚 Subjects Taught</h2>
-                    <div className="detail-section-line"></div>
+            {/* Availability */}
+            <div className="card card-padding td-section">
+              <h2 className="section-title">Availability Schedule</h2>
+
+              {/* Day filter */}
+              <div className="td-day-filter">
+                <button className={`tl-pill ${selectedDay === 'all' ? 'active' : ''}`} onClick={() => setSelectedDay('all')}>
+                  All Days
+                </button>
+                {DAYS.map(d => (
+                  <button key={d} className={`tl-pill ${selectedDay === d ? 'active' : ''}`} onClick={() => setSelectedDay(d)}>
+                    {d.charAt(0) + d.slice(1,3).toLowerCase()}
+                  </button>
+                ))}
+              </div>
+
+              {filtered.length === 0 ? (
+                <div className="empty-state" style={{padding:'32px 0'}}>
+                  <p style={{color:'var(--text-muted)',fontSize:'var(--font-size-sm)'}}>
+                    {availability.length === 0 ? 'No availability added yet.' : 'No slots for this day.'}
+                  </p>
                 </div>
-                <div className="detail-subjects-container">
-                    {tutor.subjects?.map((subject, idx) => (
-                        <div key={idx} className="detail-subject-card">
-                            <span className="detail-subject-icon">
-                                {subject === 'Mathematics' && '📐'}
-                                {subject === 'Physics' && '⚡'}
-                                {subject === 'Chemistry' && '🧪'}
-                                {subject === 'Biology' && '🧬'}
-                                {subject === 'Programming' && '💻'}
-                                {!['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Programming'].includes(subject) && '📖'}
-                            </span>
-                            <span className="detail-subject-name">{subject}</span>
-                        </div>
-                    ))}
+              ) : (
+                <div className="td-slots-grid">
+                  {filtered.map((slot, i) => (
+                    <div key={slot.availabilityId || i} className="td-slot-card">
+                      <div className="td-slot-day">{slot.dayOfTheWeek}</div>
+                      <div className="td-slot-time">
+                        {slot.startTime?.substring(0,5)} — {slot.endTime?.substring(0,5)}
+                      </div>
+                      <div className="td-slot-subject">{slot.subject || 'General'}</div>
+                      <button className="btn btn-primary btn-sm td-slot-btn" onClick={() => handleBook(slot)}>
+                        Book →
+                      </button>
+                    </div>
+                  ))}
                 </div>
+              )}
             </div>
-
-            {/* Availability Section */}
-            <div className="detail-section">
-                <div className="detail-section-header">
-                    <h2 className="detail-section-title">🗓️ Availability Schedule</h2>
-                    <div className="detail-section-line"></div>
-                </div>
-
-                {/* Day Filter */}
-                <div className="detail-day-filter">
-                    <button
-                        className={`detail-filter-btn ${selectedDay === 'all' ? 'active' : ''}`}
-                        onClick={() => setSelectedDay('all')}
-                    >
-                        All Days
-                    </button>
-                    {daysOfWeek.map(day => (
-                        <button
-                            key={day}
-                            className={`detail-filter-btn ${selectedDay === day ? 'active' : ''}`}
-                            onClick={() => setSelectedDay(day)}
-                        >
-                            {day.substring(0, 3)}
-                        </button>
-                    ))}
-                </div>
-
-                {availability.length === 0 ? (
-                    <div className="detail-empty-availability">
-                        <div className="detail-empty-icon">📅</div>
-                        <h3 className="detail-empty-title">No Availability Yet</h3>
-                        <p className="detail-empty-text">This tutor hasn't added any available time slots.</p>
-                        <button className="detail-notify-btn" onClick={() => alert("We'll notify you when they're available!")}>
-                            Notify Me
-                        </button>
-                    </div>
-                ) : filteredAvailability.length === 0 ? (
-                    <div className="detail-empty-availability">
-                        <p className="detail-empty-text">No slots available for the selected day.</p>
-                    </div>
-                ) : (
-                    <div className="detail-availability-grid">
-                        {filteredAvailability.map((slot, idx) => (
-                            <div key={slot.availabilityId || idx} className="detail-slot-card">
-                                <div className="detail-slot-day-badge">
-                                    <span className="detail-slot-day">{slot.dayOfTheWeek}</span>
-                                </div>
-                                <div className="detail-slot-info">
-                                    <div className="detail-slot-time">
-                                        <span className="detail-time-icon">⏰</span>
-                                        <span>{slot.startTime} - {slot.endTime}</span>
-                                    </div>
-                                    <div className="detail-slot-subject">
-                                        <span className="detail-subject-icon-small">📖</span>
-                                        <span>{slot.subject || 'General Session'}</span>
-                                    </div>
-                                </div>
-                                <button
-                                    className="detail-book-btn"
-                                    onClick={() => handleBookSession(slot)}
-                                >
-                                    Book Session →
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Booking Modal */}
-            {showBookingModal && selectedSlot && (
-                <div className="detail-modal-overlay" onClick={closeModal}>
-                    <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
-                        <button className="detail-modal-close" onClick={closeModal}>✖</button>
-                        <div className="detail-modal-header">
-                            <span className="detail-modal-icon">📅</span>
-                            <h3 className="detail-modal-title">Confirm Booking</h3>
-                        </div>
-                        <div className="detail-modal-content">
-                            <div className="detail-modal-detail">
-                                <span className="detail-modal-label">Tutor:</span>
-                                <span className="detail-modal-value">{tutor.name || 'Expert Tutor'}</span>
-                            </div>
-                            <div className="detail-modal-detail">
-                                <span className="detail-modal-label">Day:</span>
-                                <span className="detail-modal-value">{selectedSlot.dayOfTheWeek}</span>
-                            </div>
-                            <div className="detail-modal-detail">
-                                <span className="detail-modal-label">Time:</span>
-                                <span className="detail-modal-value">{selectedSlot.startTime} - {selectedSlot.endTime}</span>
-                            </div>
-                            <div className="detail-modal-detail">
-                                <span className="detail-modal-label">Subject:</span>
-                                <span className="detail-modal-value">{selectedSlot.subject || 'General'}</span>
-                            </div>
-                            <div className="detail-modal-detail">
-                                <span className="detail-modal-label">Rate:</span>
-                                <span className="detail-modal-value highlight">${tutor.hourlyRate}/hour</span>
-                            </div>
-                        </div>
-                        <button className="detail-modal-confirm" onClick={confirmBooking}>
-                            Continue to Booking →
-                        </button>
-                    </div>
-                </div>
-            )}
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Booking confirmation modal */}
+      {showModal && selectedSlot && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Confirm Booking</h2>
+              <button className="modal-close" onClick={closeModal}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="td-modal-details">
+                {[
+                  ['Tutor',   tutor.name || 'Expert Tutor'],
+                  ['Day',     selectedSlot.dayOfTheWeek],
+                  ['Time',    `${selectedSlot.startTime?.substring(0,5)} — ${selectedSlot.endTime?.substring(0,5)}`],
+                  ['Subject', selectedSlot.subject || 'General'],
+                  ['Rate',    `$${tutor.hourlyRate}/hr`],
+                ].map(([k,v]) => (
+                  <div key={k} className="td-modal-row">
+                    <span className="td-modal-label">{k}</span>
+                    <span className="td-modal-value">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-outline" onClick={closeModal}>Cancel</button>
+              <button className="btn btn-primary" onClick={confirmBooking}>Continue to Booking →</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
-export default TutorDetail;
+export default TutorDetails;
