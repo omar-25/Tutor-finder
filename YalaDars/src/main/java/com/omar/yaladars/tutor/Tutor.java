@@ -1,85 +1,77 @@
 package com.omar.yaladars.tutor;
 
-import com.omar.yaladars.UserManagement.User;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-public class Tutor {
+import com.omar.yaladars.UserManagement.User;
 
-    @Column(name = "user_id")
-    private UUID userId;
+@Entity
+@Table(name = "tutor_profiles", schema = "public")
+public class Tutor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
     private UUID tutorId;
 
-    private Double hourlyRate;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
+    @Column(name = "bio")
     private String bio;
 
+    @Column(name = "hourly_rate", nullable = false)
+    private Double hourlyRate;
+
+    @Column(name = "rating")
+    private Double rating = 0.0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", nullable = false)
+    private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
+
+    // getters and setters...
+
     @ElementCollection
-    private List<String> subjects;
+    @CollectionTable(name = "tutor_subjects", joinColumns = @JoinColumn(name = "tutor_id"))
+    @Column(name = "subject")
+    private List<String> subjects = new ArrayList<>();
+
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Availability> availabilities = new ArrayList<>();
 
-
-
     public Tutor() {}
 
-    public Tutor(UUID tutorId, Double hourlyRate, String bio, List<String> subjects, UUID userId) {
-        this.userId = userId;
-        this.tutorId = tutorId;
-        this.hourlyRate = hourlyRate;
-        this.bio = bio;
-        this.subjects = subjects;
+    public UUID getTutorId() { return tutorId; }
+    public void setTutorId(UUID tutorId) { this.tutorId = tutorId; }
+
+    public User getUser() {
+        return user;
     }
 
-    public UUID getTutorId() {
-        return tutorId;
-    }
-    public void setUserId(UUID userId) { this.userId = userId; }
-
-    public UUID getUserId(){
-        return userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public void setTutorId(UUID tutorId) {
-        this.tutorId = tutorId;
-    }
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
 
-    public Double getHourlyRate() {
-        return hourlyRate;
-    }
+    public Double getHourlyRate() { return hourlyRate; }
+    public void setHourlyRate(Double hourlyRate) { this.hourlyRate = hourlyRate; }
 
-    public void setHourlyRate(Double hourlyRate) {
-        this.hourlyRate = hourlyRate;
-    }
+    public Double getRating() { return rating; }
+    public void setRating(Double rating) { this.rating = rating; }
 
-    public String getBio() {
-        return bio;
-    }
+    public ApprovalStatus getApprovalStatus() { return approvalStatus; }
+    public void setApprovalStatus(ApprovalStatus approvalStatus) { this.approvalStatus = approvalStatus; }
 
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
+    public List<String> getSubjects() { return subjects; }
+    public void setSubjects(List<String> subjects) { this.subjects = subjects; }
 
-    public List<String> getSubjects() {
-        return subjects;
-    }
-
-    public void setSubjects(List<String> subjects) {
-        this.subjects = subjects;
-    }
-    // Add this inside your Tutor class, near the other getters
-    public List<Availability> getAvailabilities() {
-        return availabilities;
-    }
-
-    public void setAvailabilities(List<Availability> availabilities) {
-        this.availabilities = availabilities;
-    }
+    public List<Availability> getAvailabilities() { return availabilities; }
+    public void setAvailabilities(List<Availability> availabilities) { this.availabilities = availabilities; }
 
 }

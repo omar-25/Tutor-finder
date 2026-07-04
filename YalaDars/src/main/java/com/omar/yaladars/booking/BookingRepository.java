@@ -8,19 +8,16 @@ import java.util.UUID;
 
 public interface BookingRepository extends JpaRepository<Booking, UUID> {
 
-    // Find by student ID (User ID)
-    List<Booking> findByStudentId(UUID studentId);
+    List<Booking> findByChildId(UUID childId);
 
-    // Find by tutor ID (User ID)
-    List<Booking> findByTutorId(UUID tutorId);
+    List<Booking> findByParentId(UUID parentId);
 
-    // Find by tutor ID and status
-    List<Booking> findByTutorIdAndStatus(UUID tutorId, BookingStatus status);
+    List<Booking> findByTutorTutorId(UUID tutorId);
 
-    // Find by student ID and status
-    List<Booking> findByStudentIdAndStatus(UUID studentId, BookingStatus status);
+    List<Booking> findByTutorTutorIdAndStatus(UUID tutorId, BookingStatus status);
 
-    // Optional: Custom query to find pending bookings for tutor
-    @Query("SELECT b FROM Booking b WHERE b.tutor.id = :tutorId AND b.status = 'PENDING'")
+    List<Booking> findByParentIdAndStatus(UUID parentId, BookingStatus status);
+
+    @Query("SELECT b FROM Booking b WHERE b.tutor.tutorId = :tutorId AND b.status = 'PENDING'")
     List<Booking> findPendingBookingsByTutorId(@Param("tutorId") UUID tutorId);
 }

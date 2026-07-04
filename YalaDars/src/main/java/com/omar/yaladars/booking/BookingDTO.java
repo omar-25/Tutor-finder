@@ -7,14 +7,14 @@ import java.util.UUID;
 public class BookingDTO {
 
     private UUID id;
-    private UUID studentId;
+    private UUID childId;
+    private String childName;
+    private UUID parentId;
     private UUID tutorId;
     private String subject;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private Integer duration;
-    private BigDecimal totalAmount;
     private BookingStatus status;
+    private LocalDateTime sessionTime;
+    private BigDecimal totalAmount;
     private String notes;
     private LocalDateTime createdAt;
 
@@ -22,14 +22,14 @@ public class BookingDTO {
 
     public BookingDTO(Booking booking) {
         this.id = booking.getId();
-        this.studentId = booking.getStudent().getId();
-        this.tutorId = booking.getTutor().getId();
+        this.childId = booking.getChild().getId();
+        this.childName = booking.getChild().getName();
+        this.parentId = booking.getParent().getId();
+        this.tutorId = booking.getTutor().getTutorId();
         this.subject = booking.getSubject();
-        this.startTime = booking.getStartTime();
-        this.endTime = booking.getEndTime();
-        this.duration = booking.getDuration();
-        this.totalAmount = booking.getTotalAmount();
         this.status = booking.getStatus();
+        this.sessionTime = booking.getSessionTime();
+        this.totalAmount = booking.getTotalAmount();
         this.notes = booking.getNotes();
         this.createdAt = booking.getCreatedAt();
     }
@@ -37,8 +37,14 @@ public class BookingDTO {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public UUID getStudentId() { return studentId; }
-    public void setStudentId(UUID studentId) { this.studentId = studentId; }
+    public UUID getChildId() { return childId; }
+    public void setChildId(UUID childId) { this.childId = childId; }
+
+    public String getChildName() { return childName; }
+    public void setChildName(String childName) { this.childName = childName; }
+
+    public UUID getParentId() { return parentId; }
+    public void setParentId(UUID parentId) { this.parentId = parentId; }
 
     public UUID getTutorId() { return tutorId; }
     public void setTutorId(UUID tutorId) { this.tutorId = tutorId; }
@@ -46,20 +52,14 @@ public class BookingDTO {
     public String getSubject() { return subject; }
     public void setSubject(String subject) { this.subject = subject; }
 
-    public LocalDateTime getStartTime() { return startTime; }
-    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+    public BookingStatus getStatus() { return status; }
+    public void setStatus(BookingStatus status) { this.status = status; }
 
-    public LocalDateTime getEndTime() { return endTime; }
-    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
-
-    public Integer getDuration() { return duration; }
-    public void setDuration(Integer duration) { this.duration = duration; }
+    public LocalDateTime getSessionTime() { return sessionTime; }
+    public void setSessionTime(LocalDateTime sessionTime) { this.sessionTime = sessionTime; }
 
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
-
-    public BookingStatus getStatus() { return status; }
-    public void setStatus(BookingStatus status) { this.status = status; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

@@ -20,7 +20,4 @@ public interface TutorProfileRepository
         extends JpaRepository<Tutor, UUID>, JpaSpecificationExecutor<Tutor> {
 
     Optional<Tutor> findByUserId(UUID userId);
-    // Overriding the default parser with a custom join query
-    @Query("SELECT t FROM Tutor t, User u WHERE t.userId = u.id AND u.email = :email")
-    Optional<Tutor> findByUserEmail(@Param("email") String email);
 }

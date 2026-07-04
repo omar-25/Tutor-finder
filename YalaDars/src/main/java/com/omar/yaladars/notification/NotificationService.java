@@ -26,108 +26,69 @@ public class NotificationService implements INotificationProvider {
 
     @EventListener
     public void handleBookingEvent(BookingEvent event) {
+        UUID parentId = event.getBooking().getParent().getId();
+        UUID tutorUserId = event.getBooking().getTutor().getUser().getId();
+        String subject = event.getBooking().getSubject();
+        String childName = event.getBooking().getChild().getName();
+
         switch (event.getEventType()) {
-            case "CREATED" -> sendBookingCreatedNotification(
-                    event.getBooking().getStudent().getId(),
-                    event.getBooking().getTutor().getId(),
-                    event.getBooking().getSubject()
-            );
-            case "ACCEPTED" -> sendBookingAcceptedNotification(
-                    event.getBooking().getStudent().getId(),
-                    event.getBooking().getSubject()
-            );
-            case "REJECTED" -> sendBookingRejectedNotification(
-                    event.getBooking().getStudent().getId(),
-                    event.getBooking().getSubject(),
-                    event.getBooking().getNotes()
-            );
-            case "CANCELLED" -> sendBookingCancelledNotification(
-                    event.getBooking().getTutor().getId(),
-                    event.getBooking().getSubject()
-            );
-            case "COMPLETED" -> sendBookingCompletedNotification(
-                    event.getBooking().getStudent().getId(),
-                    event.getBooking().getSubject()
-            );
+            case "CREATED" -> {
+                notifyParent(parentId, "Booking Requested",
+                        "Your booking request for " + childName + " (" + subject + ") has been sent.");
+                notifyUser(tutorUserId, "New Booking Request",
+                        "You have a new session request for " + subject + " from " + childName + ".");
+            }
+            case "ACCEPTED" -> {
+                notifyParent(parentId, "Booking Accepted",
+                        "Your booking for " + childName + " (" + subject + ") has been accepted! Please complete payment.");
+            }
+            case "REJECTED" -> {
+                notifyParent(parentId, "Booking Rejected",
+                        "Your booking for " + childName + " (" + subject + ") was rejected. Reason: "
+                                + event.getBooking().getNotes());
+            }
+            case "CANCELLED" -> {
+                notifyUser(tutorUserId, "Booking Cancelled",
+                        "The booking for " + subject + " with " + childName + " has been cancelled.");
+            }
+            case "COMPLETED" -> {
+                notifyParent(parentId, "Session Completed",
+                        "The session for " + childName + " (" + subject + ") is complete. Leave a review!");
+            }
         }
     }
 
-    @Override
-    public void sendBookingCreatedNotification(UUID studentId, UUID tutorId, String subject) {
-        User student = userRepository.findById(studentId).orElse(null);
-        User tutor = userRepository.findById(tutorId).orElse(null);
+    // ── Override methods ────────────────────────────────
 
-        if (student != null) {
-            save(student, "BOOKING", "Booking Requested",
-                    "Your booking request for " + subject + " has been sent.");
-            notificationSender.send(
-                    student.getEmail(),
-                    "Booking Requested - YalaDars",
-                    "Hi " + student.getFirstName() + ",\n\nYour booking request for " + subject + " has been sent successfully.\n\nYalaDars Team"
-            );
-        }
-        if (tutor != null) {
-            save(tutor, "BOOKING", "New Booking Request",
-                    "You have a new booking request for " + subject + ".");
-            notificationSender.send(
-                    tutor.getEmail(),
-                    "New Booking Request - YalaDars",
-                    "Hi " + tutor.getFirstName() + ",\n\nYou have a new booking request for " + subject + ".\n\nLogin to accept or reject it.\n\nYalaDars Team"
-            );
-        }
+    @Override
+    public void sendBookingCreatedNotification(UUID parentId, UUID tutorUserId, String subject) {
+        notifyParent(parentId, "Booking Requested", "Your booking for " + subject + " has been sent.");
+        notifyUser(tutorUserId, "New Booking Request", "You have a new booking request for " + subject + ".");
     }
 
     @Override
-    public void sendBookingAcceptedNotification(UUID studentId, String subject) {
-        userRepository.findById(studentId).ifPresent(student -> {
-            save(student, "BOOKING", "Booking Accepted",
-                    "Your booking for " + subject + " has been accepted!");
-            notificationSender.send(
-                    student.getEmail(),
-                    "Booking Accepted - YalaDars",
-                    "Hi " + student.getFirstName() + ",\n\nGreat news! Your booking for " + subject + " has been accepted.\n\nYalaDars Team"
-            );
-        });
+    public void sendBookingAcceptedNotification(UUID parentId, String subject) {
+        notifyParent(parentId, "Booking Accepted", "Your booking for " + subject + " has been accepted!");
     }
 
     @Override
-    public void sendBookingRejectedNotification(UUID studentId, String subject, String reason) {
-        userRepository.findById(studentId).ifPresent(student -> {
-            save(student, "BOOKING", "Booking Rejected",
-                    "Your booking for " + subject + " was rejected. Reason: " + reason);
-            notificationSender.send(
-                    student.getEmail(),
-                    "Booking Rejected - YalaDars",
-                    "Hi " + student.getFirstName() + ",\n\nYour booking for " + subject + " was rejected.\nReason: " + reason + "\n\nYalaDars Team"
-            );
-        });
+    public void sendBookingRejectedNotification(UUID parentId, String subject, String reason) {
+        notifyParent(parentId, "Booking Rejected",
+                "Your booking for " + subject + " was rejected. Reason: " + reason);
     }
 
     @Override
-    public void sendBookingCancelledNotification(UUID tutorId, String subject) {
-        userRepository.findById(tutorId).ifPresent(tutor -> {
-            save(tutor, "BOOKING", "Booking Cancelled",
-                    "A booking for " + subject + " has been cancelled.");
-            notificationSender.send(
-                    tutor.getEmail(),
-                    "Booking Cancelled - YalaDars",
-                    "Hi " + tutor.getFirstName() + ",\n\nA booking for " + subject + " has been cancelled.\n\nYalaDars Team"
-            );
-        });
+    public void sendBookingCancelledNotification(UUID tutorUserId, String subject) {
+        notifyUser(tutorUserId, "Booking Cancelled", "A booking for " + subject + " was cancelled.");
     }
 
     @Override
-    public void sendBookingCompletedNotification(UUID studentId, String subject) {
-        userRepository.findById(studentId).ifPresent(student -> {
-            save(student, "BOOKING", "Session Completed",
-                    "Your session for " + subject + " is complete. Leave a review!");
-            notificationSender.send(
-                    student.getEmail(),
-                    "Session Completed - YalaDars",
-                    "Hi " + student.getFirstName() + ",\n\nYour session for " + subject + " is complete. Don't forget to leave a review!\n\nYalaDars Team"
-            );
-        });
+    public void sendBookingCompletedNotification(UUID parentId, String subject) {
+        notifyParent(parentId, "Session Completed",
+                "Your session for " + subject + " is complete. Leave a review!");
     }
+
+    // ── Query methods ───────────────────────────────────
 
     public List<NotificationDTO> getUserNotifications(UUID userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
@@ -140,17 +101,30 @@ public class NotificationService implements INotificationProvider {
     }
 
     public NotificationDTO markAsRead(UUID notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
+        Notification n = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
-        notification.setRead(true);
-        return new NotificationDTO(notificationRepository.save(notification));
+        n.setRead(true);
+        return new NotificationDTO(notificationRepository.save(n));
     }
 
     public void deleteNotification(UUID notificationId) {
         notificationRepository.deleteById(notificationId);
     }
 
-    private void save(User user, String type, String title, String message) {
-        notificationRepository.save(new Notification(user, type, title, message));
+    // ── Helpers ─────────────────────────────────────────
+
+    private void notifyParent(UUID parentId, String title, String message) {
+        notifyUser(parentId, title, message);
+    }
+
+    private void notifyUser(UUID userId, String title, String message) {
+        userRepository.findById(userId).ifPresent(user -> {
+            notificationRepository.save(new Notification(user, "BOOKING", title, message));
+            notificationSender.send(
+                    user.getEmail(),
+                    title + " - YalaDars",
+                    "Hi " + user.getFirstName() + ",\n\n" + message + "\n\nYalaDars Team"
+            );
+        });
     }
 }

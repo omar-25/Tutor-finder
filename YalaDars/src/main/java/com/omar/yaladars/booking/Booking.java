@@ -1,6 +1,8 @@
 package com.omar.yaladars.booking;
 
 import com.omar.yaladars.UserManagement.User;
+import com.omar.yaladars.child.Child;
+import com.omar.yaladars.tutor.Tutor;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,31 +17,31 @@ public class Booking {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
+    @JoinColumn(name = "child_id", nullable = false)
+    private Child child;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id", nullable = false)
+    private User parent;
 
     @ManyToOne
     @JoinColumn(name = "tutor_id", nullable = false)
-    private User tutor;
+    private Tutor tutor;
 
     @Column(nullable = false)
     private String subject;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
-
-    private Integer duration;
-
-    @Column(name = "total_amount", nullable = false)
-    private BigDecimal totalAmount;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BookingStatus status;
+    private BookingStatus status = BookingStatus.PENDING;
 
+    @Column(name = "session_time", nullable = false)
+    private LocalDateTime sessionTime;
+
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
+
+    @Column(columnDefinition = "TEXT")
     private String notes;
 
     @Column(name = "created_at", updatable = false)
@@ -53,9 +55,6 @@ public class Booking {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (status == null) status = BookingStatus.PENDING;
-        if (startTime != null && endTime != null) {
-            duration = (int) java.time.Duration.between(startTime, endTime).toMinutes();
-        }
     }
 
     @PreUpdate
@@ -63,35 +62,30 @@ public class Booking {
         updatedAt = LocalDateTime.now();
     }
 
-    // Constructors
     public Booking() {}
 
-    // Getters and Setters
     public UUID getId() { return id; }
 
-    public User getStudent() { return student; }
-    public void setStudent(User student) { this.student = student; }
+    public Child getChild() { return child; }
+    public void setChild(Child child) { this.child = child; }
 
-    public User getTutor() { return tutor; }
-    public void setTutor(User tutor) { this.tutor = tutor; }
+    public User getParent() { return parent; }
+    public void setParent(User parent) { this.parent = parent; }
+
+    public Tutor getTutor() { return tutor; }
+    public void setTutor(Tutor tutor) { this.tutor = tutor; }
 
     public String getSubject() { return subject; }
     public void setSubject(String subject) { this.subject = subject; }
 
-    public LocalDateTime getStartTime() { return startTime; }
-    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+    public BookingStatus getStatus() { return status; }
+    public void setStatus(BookingStatus status) { this.status = status; }
 
-    public LocalDateTime getEndTime() { return endTime; }
-    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
-
-    public Integer getDuration() { return duration; }
-    public void setDuration(Integer duration) { this.duration = duration; }
+    public LocalDateTime getSessionTime() { return sessionTime; }
+    public void setSessionTime(LocalDateTime sessionTime) { this.sessionTime = sessionTime; }
 
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
-
-    public BookingStatus getStatus() { return status; }
-    public void setStatus(BookingStatus status) { this.status = status; }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

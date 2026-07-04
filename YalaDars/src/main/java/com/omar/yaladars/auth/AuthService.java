@@ -35,24 +35,25 @@ public class AuthService implements IAuth {
             throw new RuntimeException("Email already in use");
         }
 
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setRole(request.getRole());
+       User user = new User();
+user.setEmail(request.getEmail());
+user.setPassword(passwordEncoder.encode(request.getPassword()));
+user.setFirstName(request.getFirstName());
+user.setLastName(request.getLastName());
+user.setPhoneNumber(request.getPhoneNumber());
+user.setRole(request.getRole());
 
-        userRepository.save(user);
+user = userRepository.saveAndFlush(user);   // capture + flush
 
-        // Create a linked Tutor profile when registering as a TUTOR
-        if (request.getRole() == Role.TUTOR) {
-            Tutor tutor = new Tutor();
-            tutor.setSubjects(new ArrayList<>());
-            tutor.setHourlyRate(0.0);
-            tutor.setBio("");
-            tutorRepository.save(tutor);
-        }
+if (request.getRole() == Role.TUTOR) {
+    Tutor tutor = new Tutor();
+    tutor.setUser(user);       // same managed instance
+    tutor.setSubjects(new ArrayList<>());
+    tutor.setHourlyRate(0.0);
+    tutor.setBio("");
+    tutorRepository.save(tutor);
+}
+
 
         String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
         return new AuthResponse(token, user.getEmail(), user.getRole().name());

@@ -8,7 +8,7 @@ const Register = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phoneNumber: '',
-    password: '', confirmPassword: '', role: 'STUDENT', agreeToTerms: false
+    password: '', confirmPassword: '', role: 'PARENT', agreeToTerms: false
   });
   const [errors, setErrors]           = useState({});
   const [isLoading, setIsLoading]     = useState(false);
@@ -170,7 +170,7 @@ const Register = () => {
             {/* Role selector — always visible */}
             <div className="role-selector">
               {[
-                { value: 'STUDENT', label: 'Student', icon: '🎓', desc: 'Find tutors & learn' },
+                { value: 'PARENT', label: 'Parent', icon: '🎓', desc: 'Find tutors & learn' },
                 { value: 'TUTOR',   label: 'Tutor',   icon: '👨‍🏫', desc: 'Share knowledge & earn' },
               ].map(r => (
                 <button

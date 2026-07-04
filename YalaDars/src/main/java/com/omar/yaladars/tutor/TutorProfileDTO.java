@@ -1,16 +1,17 @@
 package com.omar.yaladars.tutor;
 
 import java.util.List;
-import java.util.UUID;
+
+import com.omar.yaladars.UserManagement.User;
 
 public class TutorProfileDTO {
-    private UUID userId;
+    private User user;
     private Double hourlyRate;
     private String bio;
     private List<String> subjects;
 
-    public UUID getUserId() { return userId; }
-    public void setUserId(UUID userId) { this.userId = userId; }
+    public User getUser() { return this.user; }
+    public void setUserId(User user) { this.user = user; }
     public Double getHourlyRate() { return hourlyRate; }
     public void setHourlyRate(Double hourlyRate) { this.hourlyRate = hourlyRate; }
     public String getBio() { return bio; }

@@ -1,7 +1,7 @@
 package com.omar.yaladars.UserManagement;
 
 public enum Role {
-    STUDENT,
+    PARENT,
     TUTOR,
     ADMIN
 }

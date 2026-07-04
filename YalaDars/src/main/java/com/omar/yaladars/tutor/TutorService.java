@@ -25,21 +25,20 @@ public class TutorService implements ITutorProfile {
      * Creates a Tutor profile and links it to the User account identified
      * by userId using its unique identifier.
      */
-    @Override
-    public Tutor createTutorProfile(UUID userId, TutorProfileDTO dto) {
-        // Optional verification step: verify the user actually exists before creating a tutor profile
-        if (userId != null && !userRepository.existsById(userId)) {
-            throw new RuntimeException("User not found: " + userId);
-        }
+@Override
+public Tutor createTutorProfile(UUID userId, TutorProfileDTO dto) {
 
-        Tutor tutor = new Tutor();
-        tutor.setHourlyRate(dto.getHourlyRate());
-        tutor.setBio(dto.getBio());
-        tutor.setSubjects(dto.getSubjects());
-        tutor.setUserId(userId); // Explicitly maps the raw UUID foreign key relation
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
-        return tutorRepository.save(tutor);
-    }
+    Tutor tutor = new Tutor();
+    tutor.setUser(user);   // Instead of setUserId(...)
+    tutor.setHourlyRate(dto.getHourlyRate());
+    tutor.setBio(dto.getBio());
+    tutor.setSubjects(dto.getSubjects());
+
+    return tutorRepository.save(tutor);
+}
 
     @Override
     public Tutor getTutorProfile(UUID tutorId) {
