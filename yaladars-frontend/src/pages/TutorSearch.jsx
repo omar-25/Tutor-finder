@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import SearchFilter from '../components/SearchFilter';
-import TutorCard from '../components/TutorCard';
+import SearchFilter from './SearchFilter';
+import TutorCard from './TutorCard';
 import './TutorSearch.css';
 
 // ─── Mock data (replace with API calls to /api/tutors/search) ───────────────
